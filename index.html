@@ -35,6 +35,10 @@
       line-height: 1.65;
     }
 
+    /* Γλώσσες: δείχνει μόνο τα κείμενα της επιλεγμένης γλώσσας */
+    html[lang="el"] [lang="en"],
+    html[lang="en"] [lang="el"] { display: none; }
+
     /* Μενού πλοήγησης */
     nav {
       position: sticky; top: 0; z-index: 10;
@@ -43,7 +47,7 @@
     }
     nav ul {
       max-width: 900px; margin: 0 auto;
-      display: flex; flex-wrap: wrap; justify-content: center; gap: 4px;
+      display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px;
       list-style: none; padding: 10px 16px;
     }
     nav a {
@@ -51,6 +55,15 @@
       color: var(--muted); text-decoration: none; font-weight: 500;
     }
     nav a:hover { color: var(--accent); background: var(--accent-soft); }
+
+    /* Κουμπί αλλαγής γλώσσας */
+    #lang-toggle {
+      margin-left: 8px; padding: 5px 14px;
+      border: 1.5px solid var(--accent); border-radius: 999px;
+      background: transparent; color: var(--accent);
+      font: inherit; font-weight: 700; cursor: pointer;
+    }
+    #lang-toggle:hover { background: var(--accent); color: #fff; }
 
     /* Επικεφαλίδα */
     header {
@@ -63,7 +76,7 @@
       display: flex; align-items: center; justify-content: center;
       flex-wrap: wrap; gap: 8px;
     }
-      .uni-logo { height: 70px; width: auto; flex-shrink: 0; }
+    .uni-logo { height: 70px; width: auto; flex-shrink: 0; }
 
     /* Ενότητες */
     main { max-width: 900px; margin: 0 auto; padding: 0 16px 64px; }
@@ -97,7 +110,7 @@
     .project ul { margin: 10px 0 0 20px; color: var(--muted); }
 
     .contact-list { list-style: none; display: grid; gap: 12px; }
-        .contact-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .contact-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
     .contact-icon { width: 24px; height: 24px; object-fit: contain; flex-shrink: 0; }
     .contact-list strong { min-width: 90px; }
     .contact-list a { color: var(--accent); text-decoration: none; word-break: break-all; }
@@ -119,94 +132,138 @@
 
   <nav>
     <ul>
-      <li><a href="#about">Σχετικά με εμένα</a></li>
-      <li><a href="#skills">Δεξιότητες</a></li>
+      <li><a href="#about"><span lang="el">Σχετικά με εμένα</span><span lang="en">About me</span></a></li>
+      <li><a href="#skills"><span lang="el">Δεξιότητες</span><span lang="en">Skills</span></a></li>
       <li><a href="#projects">Projects</a></li>
-      <li><a href="#contact">Επικοινωνία</a></li>
+      <li><a href="#contact"><span lang="el">Επικοινωνία</span><span lang="en">Contact</span></a></li>
+      <li><button id="lang-toggle" type="button">EN</button></li>
     </ul>
   </nav>
 
   <header>
-    
-    <h1>Χρήστος Γκόλφος</h1>
+    <h1><span lang="el">Χρήστος Γκόλφος</span><span lang="en">Christos Gkolfos</span></h1>
     <p class="uni">
-            <!-- Λογότυπο ΑΠΘ -->
+      <!-- Λογότυπο ΑΠΘ -->
       <img src="auth-logo.jpg" alt="Λογότυπο ΑΠΘ" class="uni-logo">
-      Φοιτητής Πληροφορικής · Αριστοτέλειο Πανεπιστήμιο Θεσσαλονίκης
+      <span lang="el">Φοιτητής Πληροφορικής · Αριστοτέλειο Πανεπιστήμιο Θεσσαλονίκης</span>
+      <span lang="en">Computer Science Student · Aristotle University of Thessaloniki</span>
     </p>
   </header>
 
   <main>
 
     <section id="about">
-      <h2>Λίγα λόγια για εμένα</h2>
-      <p>
+      <h2><span lang="el">Λίγα λόγια για εμένα</span><span lang="en">About me</span></h2>
+      <p lang="el">
         Είμαι φοιτητής στο Τμήμα Πληροφορικής του Αριστοτελείου Πανεπιστημίου
         Θεσσαλονίκης και βρίσκομαι στο 4ο και τελευταίο έτος των σπουδών μου.
         Με ενδιαφέρει η ανάπτυξη λογισμικού και η τεχνητή νοημοσύνη, και
         αναζητώ ευκαιρίες να εφαρμόσω όσα έχω μάθει σε πραγματικά projects.
       </p>
+      <p lang="en">
+        I am a student at the School of Informatics of the Aristotle University
+        of Thessaloniki, currently in the 4th and final year of my studies.
+        I am interested in software development and artificial intelligence,
+        and I am looking for opportunities to apply what I have learned to real projects.
+      </p>
     </section>
 
     <section id="skills">
-      <h2>Δεξιότητες</h2>
-      <h3>Γλώσσες προγραμματισμού</h3>
+      <h2><span lang="el">Δεξιότητες</span><span lang="en">Skills</span></h2>
+      <h3><span lang="el">Γλώσσες προγραμματισμού</span><span lang="en">Programming languages</span></h3>
       <div class="tags">
         <span class="tag">Python</span>
         <span class="tag">C</span>
         <span class="tag">Java</span>
       </div>
-      <h3>Επιμόρφωση</h3>
-      <p>Παρακολούθηση σεμιναρίων Τεχνητής Νοημοσύνης.</p>
+      <h3><span lang="el">Επιμόρφωση</span><span lang="en">Training</span></h3>
+      <p lang="el">Παρακολούθηση σεμιναρίων Τεχνητής Νοημοσύνης.</p>
+      <p lang="en">Attending seminars on Artificial Intelligence.</p>
     </section>
 
     <section id="projects">
       <h2>Projects</h2>
       <div class="project">
         <h3>MyMarket</h3>
-        <p>
+        <p lang="el">
           Εφαρμογή ηλεκτρονικών αγορών όπου ο καταναλωτής επιλέγει και
           αγοράζει προϊόντα, και στη συνέχεια λαμβάνει τον λογαριασμό
           της αγοράς του καθώς και το πλήρες ιστορικό των αγορών του.
         </p>
+        <p lang="en">
+          An online shopping application where customers select and buy
+          products, and then receive the bill for their purchase along
+          with their full purchase history.
+        </p>
         <ul>
-          <li>Αγορά προϊόντων από τον καταναλωτή</li>
-          <li>Έκδοση λογαριασμού για κάθε αγορά</li>
-          <li>Προβολή ιστορικού αγορών</li>
+          <li><span lang="el">Αγορά προϊόντων από τον καταναλωτή</span><span lang="en">Product purchasing by the customer</span></li>
+          <li><span lang="el">Έκδοση λογαριασμού για κάθε αγορά</span><span lang="en">Bill generation for every purchase</span></li>
+          <li><span lang="el">Προβολή ιστορικού αγορών</span><span lang="en">Purchase history view</span></li>
         </ul>
       </div>
 
       <div class="project">
-        <h3>Client–Server Chat με Sockets</h3>
-        <p>
+        <h3><span lang="el">Client–Server Chat με Sockets</span><span lang="en">Client–Server Chat with Sockets</span></h3>
+        <p lang="el">
           Εφαρμογή δικτύων όπου πολλοί χρήστες (clients) συνδέονται σε έναν
           κεντρικό server μέσω sockets και επικοινωνούν μεταξύ τους σε
           πραγματικό χρόνο. Ο server διαχειρίζεται τις συνδέσεις και
           προωθεί τα μηνύματα στους σωστούς παραλήπτες.
         </p>
+        <p lang="en">
+          A networking application where multiple users (clients) connect to a
+          central server through sockets and communicate with each other in
+          real time. The server manages the connections and forwards each
+          message to the right recipients.
+        </p>
         <ul>
-          <li>Επικοινωνία μέσω TCP sockets με αξιόπιστη μεταφορά δεδομένων</li>
-          <li>Ταυτόχρονη εξυπηρέτηση πολλών χρηστών με χρήση threads</li>
-          <li>Αποστολή μηνυμάτων προς όλους (broadcast) ή προς συγκεκριμένο χρήστη</li>
-          <li>Εμφάνιση των χρηστών που είναι συνδεδεμένοι</li>
-          <li>Ομαλός χειρισμός αποσυνδέσεων και σφαλμάτων δικτύου</li>
+          <li><span lang="el">Επικοινωνία μέσω TCP sockets με αξιόπιστη μεταφορά δεδομένων</span><span lang="en">Communication over TCP sockets with reliable data transfer</span></li>
+          <li><span lang="el">Ταυτόχρονη εξυπηρέτηση πολλών χρηστών με χρήση threads</span><span lang="en">Serving multiple users concurrently using threads</span></li>
+          <li><span lang="el">Αποστολή μηνυμάτων προς όλους (broadcast) ή προς συγκεκριμένο χρήστη</span><span lang="en">Messages to everyone (broadcast) or to a specific user</span></li>
+          <li><span lang="el">Εμφάνιση των χρηστών που είναι συνδεδεμένοι</span><span lang="en">List of currently connected users</span></li>
+          <li><span lang="el">Ομαλός χειρισμός αποσυνδέσεων και σφαλμάτων δικτύου</span><span lang="en">Graceful handling of disconnections and network errors</span></li>
         </ul>
       </div>
     </section>
 
     <section id="contact">
-      <h2>Επικοινωνία</h2>
+      <h2><span lang="el">Επικοινωνία</span><span lang="en">Contact</span></h2>
       <ul class="contact-list">
-                <li><img src="email.jpg" alt="" class="contact-icon"><strong>Email:</strong> <a href="mailto:cgkol@csd.auth.gr">cgkol@csd.auth.gr</a></li>
-        <li><img src="phone.jpg" alt="" class="contact-icon"><strong>Τηλέφωνο:</strong> <a href="tel:+306944955814">694 495 5814</a></li>
-        </ul>
+        <li><img src="email.jpg" alt="" class="contact-icon"><strong>Email:</strong> <a href="mailto:cgkol@csd.auth.gr">cgkol@csd.auth.gr</a></li>
+        <li><img src="phone.jpg" alt="" class="contact-icon"><strong><span lang="el">Τηλέφωνο:</span><span lang="en">Phone:</span></strong> <a href="tel:+306944955814">694 495 5814</a></li>
+      </ul>
     </section>
 
   </main>
 
   <footer>
-    © 2026 · Τμήμα Πληροφορικής ΑΠΘ
+    <span lang="el">© 2026 · Τμήμα Πληροφορικής ΑΠΘ</span>
+    <span lang="en">© 2026 · School of Informatics, AUTH</span>
   </footer>
+
+  <script>
+    // Αλλαγή γλώσσας Ελληνικά / Αγγλικά
+    const langBtn = document.getElementById('lang-toggle');
+    const titles = {
+      el: 'Χρήστος Γκόλφος | Portfolio',
+      en: 'Christos Gkolfos | Portfolio'
+    };
+
+    function setLang(lang) {
+      document.documentElement.lang = lang;
+      langBtn.textContent = lang === 'el' ? 'EN' : 'ΕΛ';
+      document.title = titles[lang];
+      try { localStorage.setItem('lang', lang); } catch (e) {}
+    }
+
+    let savedLang = 'el';
+    try { savedLang = localStorage.getItem('lang') || 'el'; } catch (e) {}
+    setLang(savedLang);
+
+    langBtn.addEventListener('click', () => {
+      setLang(document.documentElement.lang === 'el' ? 'en' : 'el');
+    });
+  </script>
 
 </body>
 </html>
