@@ -14,8 +14,9 @@
       --accent-soft: #f6e9eb;
       --border: #e3e6ec;
     }
+    /* Σκούρο θέμα: αυτόματα από τον υπολογιστή, εκτός αν ο επισκέπτης διάλεξε ανοιχτό */
     @media (prefers-color-scheme: dark) {
-      :root {
+      :root:not([data-theme="light"]) {
         --bg: #12151b;
         --surface: #1a1f28;
         --text: #e8ebf1;
@@ -24,6 +25,16 @@
         --accent-soft: #2a1d22;
         --border: #2a303b;
       }
+    }
+    /* Σκούρο θέμα: όταν ο επισκέπτης το διαλέξει με το κουμπί */
+    :root[data-theme="dark"] {
+      --bg: #12151b;
+      --surface: #1a1f28;
+      --text: #e8ebf1;
+      --muted: #9aa3b2;
+      --accent: #e0707f;
+      --accent-soft: #2a1d22;
+      --border: #2a303b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -64,6 +75,14 @@
       font: inherit; font-weight: 700; cursor: pointer;
     }
     #lang-toggle:hover { background: var(--accent); color: #fff; }
+
+    /* Κουμπί σκούρου / ανοιχτού θέματος */
+    #theme-toggle {
+      margin-left: 4px; width: 36px; height: 36px;
+      border: 1.5px solid var(--border); border-radius: 50%;
+      background: transparent; font-size: 1.1rem; line-height: 1; cursor: pointer;
+    }
+    #theme-toggle:hover { border-color: var(--accent); background: var(--accent-soft); }
 
     /* Επικεφαλίδα */
     header {
@@ -137,6 +156,7 @@
       <li><a href="#projects">Projects</a></li>
       <li><a href="#contact"><span lang="el">Επικοινωνία</span><span lang="en">Contact</span></a></li>
       <li><button id="lang-toggle" type="button">EN</button></li>
+      <li><button id="theme-toggle" type="button" aria-label="Αλλαγή θέματος">🌙</button></li>
     </ul>
   </nav>
 
@@ -263,6 +283,33 @@
     langBtn.addEventListener('click', () => {
       setLang(document.documentElement.lang === 'el' ? 'en' : 'el');
     });
+
+    // Αλλαγή θέματος Σκούρο / Ανοιχτό
+    const themeBtn = document.getElementById('theme-toggle');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function currentTheme() {
+      return document.documentElement.dataset.theme || (systemDark.matches ? 'dark' : 'light');
+    }
+
+    function updateThemeIcon() {
+      // Στο σκούρο θέμα δείχνει ήλιο (για να πας στο ανοιχτό) και αντίστροφα
+      themeBtn.textContent = currentTheme() === 'dark' ? '☀️' : '🌙';
+    }
+
+    let savedTheme = null;
+    try { savedTheme = localStorage.getItem('theme'); } catch (e) {}
+    if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+    updateThemeIcon();
+
+    themeBtn.addEventListener('click', () => {
+      const next = currentTheme() === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem('theme', next); } catch (e) {}
+      updateThemeIcon();
+    });
+
+    systemDark.addEventListener('change', updateThemeIcon);
   </script>
 
 </body>
