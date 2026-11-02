@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Χρήστος Γκόλφος | Portfolio</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --text: #1d2330;
+      --muted: #5b6577;
+      --accent: #8b1d2c;      /* μπορντό, χρώμα ΑΠΘ */
+      --accent-soft: #f6e9eb;
+      --border: #e3e6ec;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #12151b;
+        --surface: #1a1f28;
+        --text: #e8ebf1;
+        --muted: #9aa3b2;
+        --accent: #e0707f;
+        --accent-soft: #2a1d22;
+        --border: #2a303b;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    /* Μενού πλοήγησης */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    nav ul {
+      max-width: 900px; margin: 0 auto;
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 4px;
+      list-style: none; padding: 10px 16px;
+    }
+    nav a {
+      display: block; padding: 6px 14px; border-radius: 6px;
+      color: var(--muted); text-decoration: none; font-weight: 500;
+    }
+    nav a:hover { color: var(--accent); background: var(--accent-soft); }
+
+    /* Επικεφαλίδα */
+    header {
+      max-width: 900px; margin: 0 auto;
+      padding: 72px 16px 48px; text-align: center;
+    }
+    header h1 { font-size: 2.2rem; line-height: 1.2; }
+    header p { color: var(--muted); font-size: 1.1rem; margin-top: 8px; }
+    .uni {
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 8px;
+    }
+      .uni-logo { height: 70px; width: auto; flex-shrink: 0; }
+
+    /* Ενότητες */
+    main { max-width: 900px; margin: 0 auto; padding: 0 16px 64px; }
+    section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 24px;
+      scroll-margin-top: 70px;
+    }
+    section h2 {
+      font-size: 1.4rem; margin-bottom: 16px;
+      padding-bottom: 8px; border-bottom: 2px solid var(--accent);
+      display: inline-block;
+    }
+    section h3 { font-size: 1.05rem; margin: 20px 0 10px; }
+    section p { color: var(--text); }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 10px; }
+    .tag {
+      background: var(--accent-soft); color: var(--accent);
+      padding: 6px 16px; border-radius: 999px; font-weight: 600;
+    }
+
+    .project {
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 20px; margin-top: 16px;
+    }
+    .project h3 { margin-top: 0; color: var(--accent); }
+    .project ul { margin: 10px 0 0 20px; color: var(--muted); }
+
+    .contact-list { list-style: none; display: grid; gap: 12px; }
+        .contact-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .contact-icon { width: 24px; height: 24px; object-fit: contain; flex-shrink: 0; }
+    .contact-list strong { min-width: 90px; }
+    .contact-list a { color: var(--accent); text-decoration: none; word-break: break-all; }
+    .contact-list a:hover { text-decoration: underline; }
+
+    footer {
+      text-align: center; color: var(--muted);
+      font-size: 0.9rem; padding: 24px 16px 40px;
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 48px 16px 32px; }
+      header h1 { font-size: 1.7rem; }
+      section { padding: 22px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <ul>
+      <li><a href="#about">Σχετικά με εμένα</a></li>
+      <li><a href="#skills">Δεξιότητες</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Επικοινωνία</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    
+    <h1>Χρήστος Γκόλφος</h1>
+    <p class="uni">
+            <!-- Λογότυπο ΑΠΘ -->
+      <img src="auth-logo.jpg" alt="Λογότυπο ΑΠΘ" class="uni-logo">
+      Φοιτητής Πληροφορικής · Αριστοτέλειο Πανεπιστήμιο Θεσσαλονίκης
+    </p>
+  </header>
+
+  <main>
+
+    <section id="about">
+      <h2>Λίγα λόγια για εμένα</h2>
+      <p>
+        Είμαι φοιτητής στο Τμήμα Πληροφορικής του Αριστοτελείου Πανεπιστημίου
+        Θεσσαλονίκης και βρίσκομαι στο 4ο και τελευταίο έτος των σπουδών μου.
+        Με ενδιαφέρει η ανάπτυξη λογισμικού και η τεχνητή νοημοσύνη, και
+        αναζητώ ευκαιρίες να εφαρμόσω όσα έχω μάθει σε πραγματικά projects.
+      </p>
+    </section>
+
+    <section id="skills">
+      <h2>Δεξιότητες</h2>
+      <h3>Γλώσσες προγραμματισμού</h3>
+      <div class="tags">
+        <span class="tag">Python</span>
+        <span class="tag">C</span>
+        <span class="tag">Java</span>
+      </div>
+      <h3>Επιμόρφωση</h3>
+      <p>Παρακολούθηση σεμιναρίων Τεχνητής Νοημοσύνης.</p>
+    </section>
+
+    <section id="projects">
+      <h2>Projects</h2>
+      <div class="project">
+        <h3>MyMarket</h3>
+        <p>
+          Εφαρμογή ηλεκτρονικών αγορών όπου ο καταναλωτής επιλέγει και
+          αγοράζει προϊόντα, και στη συνέχεια λαμβάνει τον λογαριασμό
+          της αγοράς του καθώς και το πλήρες ιστορικό των αγορών του.
+        </p>
+        <ul>
+          <li>Αγορά προϊόντων από τον καταναλωτή</li>
+          <li>Έκδοση λογαριασμού για κάθε αγορά</li>
+          <li>Προβολή ιστορικού αγορών</li>
+        </ul>
+      </div>
+
+      <div class="project">
+        <h3>Client–Server Chat με Sockets</h3>
+        <p>
+          Εφαρμογή δικτύων όπου πολλοί χρήστες (clients) συνδέονται σε έναν
+          κεντρικό server μέσω sockets και επικοινωνούν μεταξύ τους σε
+          πραγματικό χρόνο. Ο server διαχειρίζεται τις συνδέσεις και
+          προωθεί τα μηνύματα στους σωστούς παραλήπτες.
+        </p>
+        <ul>
+          <li>Επικοινωνία μέσω TCP sockets με αξιόπιστη μεταφορά δεδομένων</li>
+          <li>Ταυτόχρονη εξυπηρέτηση πολλών χρηστών με χρήση threads</li>
+          <li>Αποστολή μηνυμάτων προς όλους (broadcast) ή προς συγκεκριμένο χρήστη</li>
+          <li>Εμφάνιση των χρηστών που είναι συνδεδεμένοι</li>
+          <li>Ομαλός χειρισμός αποσυνδέσεων και σφαλμάτων δικτύου</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="contact">
+      <h2>Επικοινωνία</h2>
+      <ul class="contact-list">
+                <li><img src="email.jpg" alt="" class="contact-icon"><strong>Email:</strong> <a href="mailto:cgkol@csd.auth.gr">cgkol@csd.auth.gr</a></li>
+                  </ul>
+        <li><img src="phone.jpg" alt="" class="contact-icon"><strong>Τηλέφωνο:</strong> <a href="tel:+306944955814">694 495 5814</a></li>
+    </section>
+
+  </main>
+
+  <footer>
+    © 2026 · Τμήμα Πληροφορικής ΑΠΘ
+  </footer>
+
+</body>
+</html>
