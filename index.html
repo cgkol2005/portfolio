@@ -133,6 +133,14 @@
     }
     .project h3 { margin-top: 0; color: var(--accent); }
     .project ul { margin: 10px 0 0 20px; color: var(--muted); }
+    .project-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 14px; padding: 8px 18px;
+      border: 1.5px solid var(--accent); border-radius: 8px;
+      color: var(--accent); text-decoration: none; font-weight: 600;
+    }
+    .project-link:hover { background: var(--accent); color: #fff; }
+    .project-link svg { width: 18px; height: 18px; fill: currentColor; }
 
     .contact-list { list-style: none; display: grid; gap: 12px; margin-bottom: 24px; }
     .contact-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
@@ -308,6 +316,31 @@
           <li><span lang="el">Εμφάνιση των χρηστών που είναι συνδεδεμένοι</span><span lang="en">List of currently connected users</span></li>
           <li><span lang="el">Ομαλός χειρισμός αποσυνδέσεων και σφαλμάτων δικτύου</span><span lang="en">Graceful handling of disconnections and network errors</span></li>
         </ul>
+      </div>
+
+      <div class="project">
+        <h3><span lang="el">Προσωπικό Portfolio</span><span lang="en">Personal Portfolio</span></h3>
+        <p lang="el">
+          Η προσωπική μου ιστοσελίδα, που φτιάχτηκε για να με γνωρίσει κανείς:
+          ποιος είμαι, τι σπουδάζω στο Τμήμα Πληροφορικής του ΑΠΘ, ποιες γλώσσες
+          προγραμματισμού γνωρίζω και με ποια projects έχω ασχοληθεί.
+        </p>
+        <p lang="en">
+          My personal website, built so people can get to know me: who I am,
+          what I study at the School of Informatics of AUTH, which programming
+          languages I know and the projects I have worked on.
+        </p>
+        <ul>
+          <li><span lang="el">HTML, CSS και JavaScript χωρίς βιβλιοθήκες</span><span lang="en">Plain HTML, CSS and JavaScript, no libraries</span></li>
+          <li><span lang="el">Δίγλωσση σελίδα (Ελληνικά / Αγγλικά)</span><span lang="en">Bilingual page (Greek / English)</span></li>
+          <li><span lang="el">Σκούρο και ανοιχτό θέμα</span><span lang="en">Dark and light theme</span></li>
+          <li><span lang="el">Φόρμα επικοινωνίας με έλεγχο πεδίων</span><span lang="en">Contact form with field validation</span></li>
+          <li><span lang="el">Προσαρμόζεται σε κινητά και tablet</span><span lang="en">Responsive on phones and tablets</span></li>
+        </ul>
+        <a class="project-link" href="https://github.com/cgkol2005/portfolio" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
       </div>
     </section>
 
