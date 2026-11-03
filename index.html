@@ -13,6 +13,8 @@
       --accent: #8b1d2c;      /* μπορντό, χρώμα ΑΠΘ */
       --accent-soft: #f6e9eb;
       --border: #e3e6ec;
+      --success: #1f7a4d;
+      --error: #b3261e;
     }
     /* Σκούρο θέμα: αυτόματα από τον υπολογιστή, εκτός αν ο επισκέπτης διάλεξε ανοιχτό */
     @media (prefers-color-scheme: dark) {
@@ -24,6 +26,8 @@
         --accent: #e0707f;
         --accent-soft: #2a1d22;
         --border: #2a303b;
+        --success: #5fcf95;
+        --error: #f28b82;
       }
     }
     /* Σκούρο θέμα: όταν ο επισκέπτης το διαλέξει με το κουμπί */
@@ -35,6 +39,8 @@
       --accent: #e0707f;
       --accent-soft: #2a1d22;
       --border: #2a303b;
+      --success: #5fcf95;
+      --error: #f28b82;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -128,12 +134,69 @@
     .project h3 { margin-top: 0; color: var(--accent); }
     .project ul { margin: 10px 0 0 20px; color: var(--muted); }
 
-    .contact-list { list-style: none; display: grid; gap: 12px; }
+    .contact-list { list-style: none; display: grid; gap: 12px; margin-bottom: 24px; }
     .contact-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
     .contact-icon { width: 24px; height: 24px; object-fit: contain; flex-shrink: 0; }
     .contact-list strong { min-width: 90px; }
     .contact-list a { color: var(--accent); text-decoration: none; word-break: break-all; }
     .contact-list a:hover { text-decoration: underline; }
+
+    /* Φόρμα επικοινωνίας */
+    .contact-intro { color: var(--muted); margin-bottom: 18px; }
+    .contact-form { display: grid; gap: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-weight: 600; font-size: 0.95rem; }
+    .field .required { color: var(--accent); }
+    .field input,
+    .field textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field textarea { min-height: 140px; resize: vertical; }
+    .field input:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .field input.invalid,
+    .field textarea.invalid { border-color: var(--error); }
+    .field-error { color: var(--error); font-size: 0.85rem; min-height: 1em; }
+
+    /* Κρυφό πεδίο κατά των spam bots */
+    .honeypot { position: absolute; left: -9999px; }
+
+    .submit-btn {
+      justify-self: start;
+      padding: 12px 32px;
+      border: none; border-radius: 8px;
+      background: var(--accent); color: #fff;
+      font: inherit; font-weight: 700; cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .submit-btn:hover { opacity: 0.9; }
+    .submit-btn:active { transform: translateY(1px); }
+    .submit-btn:disabled { opacity: 0.6; cursor: wait; }
+
+    .form-status {
+      display: none;
+      padding: 12px 16px; border-radius: 8px; font-weight: 600;
+    }
+    .form-status.success {
+      display: block; color: var(--success);
+      border: 1.5px solid var(--success);
+    }
+    .form-status.error {
+      display: block; color: var(--error);
+      border: 1.5px solid var(--error);
+    }
 
     footer {
       text-align: center; color: var(--muted);
@@ -144,6 +207,8 @@
       header { padding: 48px 16px 32px; }
       header h1 { font-size: 1.7rem; }
       section { padding: 22px 18px; }
+      .form-row { grid-template-columns: 1fr; }
+      .submit-btn { justify-self: stretch; }
     }
   </style>
 </head>
@@ -248,10 +313,64 @@
 
     <section id="contact">
       <h2><span lang="el">Επικοινωνία</span><span lang="en">Contact</span></h2>
+
       <ul class="contact-list">
         <li><img src="email.jpg" alt="" class="contact-icon"><strong>Email:</strong> <a href="mailto:cgkol@csd.auth.gr">cgkol@csd.auth.gr</a></li>
-        <li><img src="phone.jpg" alt="" class="contact-icon"><strong><span lang="el">Τηλέφωνο:</span><span lang="en">Phone:</span></strong> <a href="tel:+306944955814">694 495 5814</a></li>
       </ul>
+
+      <p class="contact-intro">
+        <span lang="el">Ή συμπληρώστε τη φόρμα και θα επικοινωνήσω μαζί σας το συντομότερο.</span>
+        <span lang="en">Or fill in the form and I will get back to you as soon as possible.</span>
+      </p>
+
+      <!-- Φόρμα επικοινωνίας (αποστολή μέσω FormSubmit, χωρίς δικό μας server) -->
+      <form id="contact-form" class="contact-form" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label for="name">
+              <span lang="el">Ονοματεπώνυμο</span><span lang="en">Full name</span>
+              <span class="required">*</span>
+            </label>
+            <input type="text" id="name" name="name" autocomplete="name" required>
+            <span class="field-error" data-for="name"></span>
+          </div>
+
+          <div class="field">
+            <label for="phone">
+              <span lang="el">Τηλέφωνο</span><span lang="en">Phone</span>
+              <span class="required">*</span>
+            </label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel" required>
+            <span class="field-error" data-for="phone"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">
+            Email <span class="required">*</span>
+          </label>
+          <input type="email" id="email" name="email" autocomplete="email" required>
+          <span class="field-error" data-for="email"></span>
+        </div>
+
+        <div class="field">
+          <label for="reason">
+            <span lang="el">Λόγος επικοινωνίας</span><span lang="en">Reason for contact</span>
+            <span class="required">*</span>
+          </label>
+          <textarea id="reason" name="reason" required></textarea>
+          <span class="field-error" data-for="reason"></span>
+        </div>
+
+        <!-- Παγίδα για bots: οι άνθρωποι δεν το βλέπουν -->
+        <input type="text" name="_honey" class="honeypot" tabindex="-1" autocomplete="off">
+
+        <button type="submit" class="submit-btn" id="submit-btn">
+          <span lang="el">Αποστολή</span><span lang="en">Send</span>
+        </button>
+
+        <div id="form-status" class="form-status" role="status" aria-live="polite"></div>
+      </form>
     </section>
 
   </main>
@@ -269,10 +388,29 @@
       en: 'Christos Gkolfos | Portfolio'
     };
 
+    // Placeholders της φόρμας σε κάθε γλώσσα
+    const placeholders = {
+      el: {
+        name: 'π.χ. Γιώργος Παπαδόπουλος',
+        phone: 'π.χ. 69XXXXXXXX',
+        email: 'π.χ. onoma@example.com',
+        reason: 'Γράψτε τον λόγο που επικοινωνείτε μαζί μου...'
+      },
+      en: {
+        name: 'e.g. John Smith',
+        phone: 'e.g. +30 69XXXXXXXX',
+        email: 'e.g. name@example.com',
+        reason: 'Tell me why you are getting in touch...'
+      }
+    };
+
     function setLang(lang) {
       document.documentElement.lang = lang;
       langBtn.textContent = lang === 'el' ? 'EN' : 'ΕΛ';
       document.title = titles[lang];
+      for (const id in placeholders[lang]) {
+        document.getElementById(id).placeholder = placeholders[lang][id];
+      }
       try { localStorage.setItem('lang', lang); } catch (e) {}
     }
 
@@ -282,6 +420,7 @@
 
     langBtn.addEventListener('click', () => {
       setLang(document.documentElement.lang === 'el' ? 'en' : 'el');
+      clearErrors();
     });
 
     // Αλλαγή θέματος Σκούρο / Ανοιχτό
@@ -310,6 +449,115 @@
     });
 
     systemDark.addEventListener('change', updateThemeIcon);
+
+    // ===== Φόρμα επικοινωνίας =====
+    // Τα μηνύματα έρχονται στο email σου μέσω της δωρεάν υπηρεσίας FormSubmit
+    const FORM_ENDPOINT = 'https://formsubmit.co/ajax/cgkol@csd.auth.gr';
+
+    const form = document.getElementById('contact-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const statusBox = document.getElementById('form-status');
+
+    const messages = {
+      el: {
+        required: 'Το πεδίο είναι υποχρεωτικό.',
+        email: 'Δώστε ένα έγκυρο email.',
+        phone: 'Δώστε ένα έγκυρο τηλέφωνο (μόνο αριθμοί, 10–15 ψηφία).',
+        sending: 'Αποστολή...',
+        success: 'Ευχαριστώ! Το μήνυμά σας στάλθηκε. Θα επικοινωνήσω μαζί σας σύντομα.',
+        error: 'Κάτι πήγε στραβά. Δοκιμάστε ξανά ή στείλτε μου απευθείας email.'
+      },
+      en: {
+        required: 'This field is required.',
+        email: 'Please enter a valid email.',
+        phone: 'Please enter a valid phone number (digits only, 10–15 digits).',
+        sending: 'Sending...',
+        success: 'Thank you! Your message has been sent. I will get back to you soon.',
+        error: 'Something went wrong. Please try again or email me directly.'
+      }
+    };
+
+    const t = key => messages[document.documentElement.lang][key];
+
+    function showError(id, text) {
+      document.getElementById(id).classList.toggle('invalid', Boolean(text));
+      document.querySelector(`.field-error[data-for="${id}"]`).textContent = text;
+    }
+
+    function clearErrors() {
+      ['name', 'phone', 'email', 'reason'].forEach(id => showError(id, ''));
+    }
+
+    function validate() {
+      let ok = true;
+      const name = form.name.value.trim();
+      const phone = form.phone.value.trim();
+      const email = form.email.value.trim();
+      const reason = form.reason.value.trim();
+
+      showError('name', name ? '' : t('required'));
+      if (!name) ok = false;
+
+      const digits = phone.replace(/[\s\-()+]/g, '');
+      if (!phone) { showError('phone', t('required')); ok = false; }
+      else if (!/^\d{10,15}$/.test(digits)) { showError('phone', t('phone')); ok = false; }
+      else showError('phone', '');
+
+      if (!email) { showError('email', t('required')); ok = false; }
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('email', t('email')); ok = false; }
+      else showError('email', '');
+
+      showError('reason', reason ? '' : t('required'));
+      if (!reason) ok = false;
+
+      return ok;
+    }
+
+    // Καθαρίζει το σφάλμα μόλις ο χρήστης αρχίσει να γράφει
+    form.querySelectorAll('input, textarea').forEach(el => {
+      el.addEventListener('input', () => { if (el.id) showError(el.id, ''); });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusBox.className = 'form-status';
+      if (!validate()) return;
+
+      // Αν έχει συμπληρωθεί το κρυφό πεδίο, είναι bot
+      if (form._honey.value) return;
+
+      submitBtn.disabled = true;
+      const originalBtn = submitBtn.innerHTML;
+      submitBtn.textContent = t('sending');
+
+      try {
+        const response = await fetch(FORM_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            'Όνομα / Name': form.name.value.trim(),
+            'Τηλέφωνο / Phone': form.phone.value.trim(),
+            'Email': form.email.value.trim(),
+            'Λόγος / Reason': form.reason.value.trim(),
+            _replyto: form.email.value.trim(),
+            _subject: 'Νέο μήνυμα από το portfolio',
+            _template: 'table'
+          })
+        });
+        const data = await response.json();
+        if (!response.ok || String(data.success) !== 'true') throw new Error();
+
+        statusBox.textContent = t('success');
+        statusBox.className = 'form-status success';
+        form.reset();
+      } catch (err) {
+        statusBox.textContent = t('error');
+        statusBox.className = 'form-status error';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtn;
+      }
+    });
   </script>
 
 </body>
