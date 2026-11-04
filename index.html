@@ -124,6 +124,14 @@
     section h3 { font-size: 1.05rem; margin: 20px 0 10px; }
     section p { color: var(--text); }
 
+    /* Ενδιαφέροντα: λίστα με βελάκια */
+    .interests { list-style: none; display: grid; gap: 8px; }
+    .interests li { position: relative; padding-left: 26px; }
+    .interests li::before {
+      content: "→"; position: absolute; left: 0;
+      color: var(--accent); font-weight: 700;
+    }
+
     .tags { display: flex; flex-wrap: wrap; gap: 10px; }
     .tag {
       background: var(--accent-soft); color: var(--accent);
@@ -264,6 +272,11 @@
         I am interested in software development and artificial intelligence,
         and I am looking for opportunities to apply what I have learned to real projects.
       </p>
+      <h3><span lang="el">Ενδιαφέροντα</span><span lang="en">Interests</span></h3>
+      <ul class="interests">
+        <li><strong><span lang="el">Τεχνητή νοημοσύνη</span><span lang="en">Artificial intelligence</span></strong><span lang="el">: μηχανική μάθηση και εφαρμογές που λύνουν πραγματικά προβλήματα.</span><span lang="en">: machine learning and applications that solve real-world problems.</span></li>
+        <li><strong><span lang="el">Κυβερνοασφάλεια &amp; ασφάλεια δεδομένων</span><span lang="en">Cybersecurity &amp; data security</span></strong><span lang="el">: προστασία συστημάτων και προσωπικών δεδομένων από επιθέσεις και διαρροές.</span><span lang="en">: protecting systems and personal data from attacks and leaks.</span></li>
+      </ul>
     </section>
 
     <section id="skills">
@@ -366,8 +379,8 @@
       </ul>
 
       <p class="contact-intro">
-        <span lang="el">Ή συμπληρώστε τη φόρμα και θα επικοινωνήσω μαζί σας το συντομότερο.</span>
-        <span lang="en">Or fill in the form and I will get back to you as soon as possible.</span>
+        <span lang="el">Συμπληρώστε τη φόρμα και θα επικοινωνήσω μαζί σας το συντομότερο.</span>
+        <span lang="en">Fill in the form and I will get back to you as soon as possible.</span>
       </p>
 
       <!-- Φόρμα επικοινωνίας (αποστολή μέσω FormSubmit, χωρίς δικό μας server) -->
