@@ -11,10 +11,15 @@ if (!file) {
     file = (input.tool_input && input.tool_input.file_path) || (input.tool_response && input.tool_response.filePath);
   } catch (e) { process.exit(0); }
 }
-if (!file || path.basename(file) !== 'index.html') process.exit(0);
+if (!file || !['index.html', 'chat.css'].includes(path.basename(file))) process.exit(0);
+// Τα χρώματα ορίζονται στο index.html· το chat.css ελέγχεται για σταθερά χρώματα κειμένου
+const dir = path.dirname(file);
+file = path.join(dir, 'index.html');
 
 let html;
 try { html = fs.readFileSync(file, 'utf8'); } catch (e) { process.exit(0); }
+let chatCss = '';
+try { chatCss = fs.readFileSync(path.join(dir, 'chat.css'), 'utf8'); } catch (e) {}
 
 // Συνδυασμοί [χρώμα κειμένου, φόντο, πού χρησιμοποιείται]
 const PAIRS = [
@@ -65,7 +70,7 @@ if (d1 && d2 && JSON.stringify(d1) !== JSON.stringify(d2)) {
 }
 
 // Σκληροκωδικοποιημένα χρώματα κειμένου εκτός των :root blocks
-const css = (html.match(/<style>([\s\S]*?)<\/style>/) || [, ''])[1];
+const css = (html.match(/<style>([\s\S]*?)<\/style>/) || [, ''])[1] + '\n' + chatCss;
 for (const m of css.matchAll(/(^|[;{\s])color\s*:\s*(#[0-9a-fA-F]{3,8}|rgb[^;]*|white|black)/g)) {
   problems.push(`Σκληροκωδικοποιημένο χρώμα κειμένου «color: ${m[2]}» στο CSS — χρησιμοποίησε μεταβλητή (π.χ. var(--on-accent)) ώστε να ελέγχεται και στα δύο θέματα.`);
 }

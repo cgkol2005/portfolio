@@ -1,0 +1,9 @@
+{
+  "name": "portfolio-gkolfos",
+  "private": true,
+  "type": "module",
+  "description": "Portfolio του Χρήστου Γκόλφου. Το package.json υπάρχει μόνο για τη συνάρτηση της συνομιλίας (functions/api/chat.js).",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.4.0"
+  }
+}

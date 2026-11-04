@@ -17,14 +17,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Ανεβαίνουν μόνο τα αρχεία της σελίδας (html + εικόνες στη ρίζα),
-      # όχι CLAUDE.md, .claude/, .github/ κ.λπ.
+      # Το functions/api/chat.js (συνομιλία) χρειάζεται το @anthropic-ai/sdk
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+
+      # Ανεβαίνουν μόνο τα αρχεία της σελίδας (html, css, js, εικόνες στη ρίζα),
+      # όχι CLAUDE.md, .claude/, .github/, package.json κ.λπ. Το functions/ το βρίσκει μόνο του το wrangler.
       - name: Collect site files
         run: |
           mkdir dist
-          find . -maxdepth 1 -type f \( -iname '*.html' -o -iname '*.jpg' -o -iname '*.jpeg' \
-            -o -iname '*.png' -o -iname '*.svg' -o -iname '*.ico' -o -iname '*.webp' -o -iname '*.gif' \) \
-            -exec cp {} dist/ \;
+          find . -maxdepth 1 -type f \( -iname '*.html' -o -iname '*.css' -o -iname '*.js' \
+            -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.svg' -o -iname '*.ico' \
+            -o -iname '*.webp' -o -iname '*.gif' \) -exec cp {} dist/ \;
           test -f dist/index.html
           ls -l dist
 

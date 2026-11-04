@@ -4,11 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Portfolio — Χρήστος Γκόλφος
 
-Στατικό προσωπικό portfolio. Όλη η σελίδα είναι ένα αρχείο, το `index.html`, με inline CSS και JS. Δεν υπάρχει build, npm ή framework.
+Προσωπικό portfolio, χωρίς build και χωρίς framework:
+- `index.html`: όλο το περιεχόμενο, με inline CSS και JS (γλώσσα, θέμα, φόρμα επικοινωνίας).
+- `chat.js` / `chat.css`: η συνομιλία (κουμπί στη γωνία, παράθυρο, ιστορικό).
+- `functions/api/chat.js`: Cloudflare Pages Function `POST /api/chat`, που απαντά με το Claude API.
+- `package.json`: υπάρχει μόνο για το `@anthropic-ai/sdk` της συνάρτησης. Το `.claude/package.json` (`"type": "commonjs"`) κρατά τα scripts των hooks σε CommonJS. **Μην το σβήσεις**, γιατί χωρίς αυτό σταματούν όλοι οι έλεγχοι.
 
 ## Εντολές
-- Προεπισκόπηση: άνοιγμα του `index.html` στον browser (δεν υπάρχει build ή dev server).
-- Έλεγχος EL/EN (δεν τυπώνει τίποτα αν όλα είναι εντάξει): `echo '{"tool_input":{"file_path":"index.html"}}' | node .claude/hooks/check-lang.js`
+- Προεπισκόπηση: άνοιγμα του `index.html` στον browser. Η συνομιλία εκεί δεν απαντά, γιατί δεν υπάρχει `/api/chat`, και δείχνει «δεν είναι διαθέσιμη».
+- Εγκατάσταση για τη συνάρτηση: `npm install`. Το `wrangler pages dev` δεν ξεκινά σε αυτό το περιβάλλον (σφάλμα «write EOF» του inspector). Η συνάρτηση δοκιμάζεται σε Node, εισάγοντας το `onRequestPost` με ψεύτικο `env` και `fetch`.
+- Έλεγχος EL/EN (δεν τυπώνει τίποτα αν όλα είναι εντάξει): `echo '{"tool_input":{"file_path":"index.html"}}' | node .claude/hooks/check-lang.js`, και το ίδιο με `chat.js`.
 - Deploy: δες την ενότητα «Deploy».
 
 ## Δομή του `index.html`
@@ -33,6 +38,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Ο έλεγχος γίνεται με `node .claude/hooks/check-contrast.js index.html`, που τρέχει και αυτόματα ως hook. Αν προσθέσεις νέο συνδυασμό κειμένου και φόντου, πρόσθεσέ τον στη λίστα `PAIRS` του script.
 - Η επιλογή θέματος αποθηκεύεται στο `localStorage.theme`.
 
+## Συνομιλία (chat)
+- **Browser (`chat.js`):** όλη η κατάσταση ζει στο `chatState` και αλλάζει μόνο μέσω των `addMessage`, `clearChat` και `setPending`, που αποθηκεύουν στο `localStorage['chat-history']` και καλούν την `render()`.
+  - Τα μηνύματα σφάλματος που δημιουργούνται τοπικά έχουν `local: true` και δεν στέλνονται στον server.
+  - Τα κείμενα βρίσκονται στο `chatText` (el/en). Όταν αλλάζει το `<html lang>`, ένας `MutationObserver` ενημερώνει τα κείμενα της συνομιλίας.
+- **Server (`functions/api/chat.js`):** διαβάζει το `index.html` μέσω `env.ASSETS` και κρατά μόνο το ορατό κείμενο (`extractPageText`). Στέλνει αυτό το κείμενο στο `claude-opus-5-5` (effort `low`, `fallbacks: 'default'`) με οδηγία να απαντά **μόνο** από αυτό.
+  - Ό,τι προστίθεται στη σελίδα το «ξέρει» αυτόματα το chat. Ό,τι δεν γράφεται στη σελίδα (π.χ. ηλικία, τηλέφωνο) δεν το λέει.
+- **Όρια:** ερώτηση έως **300** χαρακτήρες (`maxlength` και έλεγχος στο `chat.js`, και 400 `question_too_long` από τον server). Απάντηση έως **500** χαρακτήρες (οδηγία στο prompt και `limitAnswer()` στον server).
+  - Αν αλλάξουν, πρέπει να αλλάξουν μαζί: `MAX_QUESTION` / `MAX_ANSWER` και στα δύο αρχεία, το `maxlength`, το «0/300» στο HTML και τα κείμενα `tooLong` / `label-chat-input`.
+- **Κλειδί:** secret `ANTHROPIC_API_KEY` στο Cloudflare Pages. Ορίζεται από τον χρήστη με `npx wrangler pages secret put ANTHROPIC_API_KEY --project-name portfolio-gkolfos`. Χωρίς αυτό, το `/api/chat` επιστρέφει 503 και το chat γράφει «δεν είναι διαθέσιμη».
+
 ## Δεξιότητες
 - Οι δεξιότητες είναι tags: `<div class="tags"><span class="tag">…</span></div>` κάτω από `<h3>` για κάθε κατηγορία.
 
@@ -50,9 +65,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Deploy (Cloudflare Pages)
 - Project: `portfolio-gkolfos`. Live: https://portfolio-gkolfos.pages.dev
 - **Κάθε push στο `main`** (από οπουδήποτε) κάνει αυτόματα deploy μέσω GitHub Actions (`.github/workflows/deploy.yml`).
-  Χρειάζεται το secret `CLOUDFLARE_API_TOKEN` στο GitHub repo. Ανεβαίνουν **μόνο** τα αρχεία της σελίδας (html και εικόνες στη ρίζα), όχι τα `CLAUDE.md`, `.claude/` και `.github/`.
+  Χρειάζεται το secret `CLOUDFLARE_API_TOKEN` στο GitHub repo. Ανεβαίνουν **μόνο** τα αρχεία της σελίδας (html, css, js και εικόνες στη ρίζα) και ο φάκελος `functions/`, όχι τα `CLAUDE.md`, `.claude/`, `.github/` και `package.json`. Το workflow τρέχει `npm ci`, γιατί η συνάρτηση χρειάζεται το SDK.
 - Πρόοδος του deploy: https://github.com/cgkol2005/portfolio/actions
-- Χειροκίνητο deploy, μόνο αν το ζητήσει ο χρήστης: `echo {} | node .claude/hooks/deploy.js` (ανεβάζει το `HEAD`).
+- Χειροκίνητο deploy, μόνο αν το ζητήσει ο χρήστης: `echo {} | node .claude/hooks/deploy.js` (ανεβάζει το `HEAD`, μαζί με το `functions/`).
   **Όχι** `wrangler pages deploy .`, γιατί αυτό θα ανέβαζε δημόσια και τα `CLAUDE.md` και `.claude/`.
 - Μετά το push, έλεγχος με `curl -s https://portfolio-gkolfos.pages.dev/` ότι η αλλαγή φαίνεται online. Το deploy θέλει περίπου 1 λεπτό.
 
@@ -60,8 +75,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `/portfolio-add [δεξιότητα|project] <περιγραφή>` (`.claude/skills/portfolio-add/SKILL.md`): προσθέτει δεξιότητα ή project σε EL και EN, και μετά κάνει commit, push και deploy.
 
 ## Hooks (`.claude/settings.json`)
-- `check-lang.js`: μετά από αλλαγή στο `index.html`, ελέγχει ότι υπάρχει ίδιος αριθμός `lang="el"` και `lang="en"`, και ότι τα el/en blocks στο JS έχουν τα ίδια κλειδιά.
-- `check-contrast.js`: μετά από αλλαγή στο `index.html`, ελέγχει ότι όλοι οι συνδυασμοί κειμένου και φόντου έχουν αντίθεση ≥ 4.5:1 και στα δύο θέματα, και ότι δεν υπάρχουν σταθερά χρώματα κειμένου εκτός των μεταβλητών.
+- `check-lang.js`: μετά από αλλαγή στο `index.html` ή στο `chat.js`, ελέγχει ότι υπάρχει ίδιος αριθμός `lang="el"` και `lang="en"`, και ότι τα el/en blocks στο JS έχουν τα ίδια κλειδιά.
+- `check-contrast.js`: μετά από αλλαγή στο `index.html` ή στο `chat.css`, ελέγχει ότι όλοι οι συνδυασμοί κειμένου και φόντου έχουν αντίθεση ≥ 4.5:1 και στα δύο θέματα, και ότι δεν υπάρχουν σταθερά χρώματα κειμένου εκτός των μεταβλητών.
 - `git-reminder.js`: στο τέλος κάθε απάντησης, εμφανίζει μήνυμα αν υπάρχουν αλλαγές χωρίς commit ή push.
 
 ## Κινητό
@@ -71,6 +86,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   Μην τραβάς screenshot με `--window-size=375` απευθείας: το headless Chrome δεν στενεύει κάτω από ~500px και δίνει ψεύτικο κόψιμο του κειμένου.
 
 ## Έλεγχος αλλαγών
-Δεν υπάρχουν tests. Μετά από κάθε αλλαγή στο `index.html`:
+Δεν υπάρχουν tests. Μετά από κάθε αλλαγή στο `index.html`, `chat.js` ή `chat.css`:
 1. `check-lang.js` και `check-contrast.js`: τρέχουν αυτόματα ως hooks.
 2. `bash .claude/tools/mobile-preview.sh <φάκελος>` και έλεγχος του screenshot σε κινητό, ανοιχτό και σκούρο θέμα.
