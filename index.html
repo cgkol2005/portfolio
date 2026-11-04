@@ -224,7 +224,100 @@
       font-size: 0.9rem; padding: 24px 16px 40px;
     }
 
+    /* Κουμπί στη γωνία (πάνω δεξιά, κάτω από το μενού) */
+    .corner-btn {
+      position: fixed; right: 20px; z-index: 20;
+      top: calc(var(--nav-h, 60px) + 16px);
+      width: 52px; height: 52px; border-radius: 50%;
+      border: none; cursor: pointer;
+      background: var(--accent); color: var(--on-accent);
+      display: grid; place-items: center;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .corner-btn:hover,
+    .corner-btn:focus-visible {
+      transform: scale(1.2);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    .corner-btn:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+    .corner-btn svg { width: 24px; height: 24px; fill: currentColor; }
+
+    /* Παράθυρο που ανοίγει από το κουμπί */
+    .info-dialog {
+      margin: auto;
+      width: min(92vw, 480px);
+      max-height: 85vh;
+      padding: 28px 24px 24px;
+      border: 1px solid var(--border); border-radius: 12px;
+      background: var(--surface); color: var(--text);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+    .info-dialog::backdrop { background: rgba(0, 0, 0, 0.55); }
+    .info-dialog h2 {
+      font-size: 1.3rem; margin: 0 40px 12px 0;
+      padding-bottom: 6px; border-bottom: 2px solid var(--accent);
+      display: inline-block;
+    }
+    .dialog-close {
+      position: absolute; top: 12px; right: 12px;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1.5px solid var(--border); background: transparent;
+      color: var(--text); font-size: 1.5rem; line-height: 1; cursor: pointer;
+    }
+    .dialog-close:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Συνομιλία μέσα στο παράθυρο */
+    .info-dialog[open] { display: flex; flex-direction: column; }
+    .info-dialog h2 { align-self: flex-start; }
+    .chat-log {
+      list-style: none;
+      display: flex; flex-direction: column; gap: 10px;
+      min-height: 180px; max-height: 50vh; overflow-y: auto;
+      padding: 4px 2px 12px; margin-bottom: 12px;
+    }
+    .chat-msg {
+      max-width: 85%; padding: 9px 14px; border-radius: 14px;
+      white-space: pre-wrap; overflow-wrap: anywhere;
+    }
+    .chat-msg.user {
+      align-self: flex-end; border-bottom-right-radius: 4px;
+      background: var(--accent); color: var(--on-accent);
+    }
+    .chat-msg.assistant {
+      align-self: flex-start; border-bottom-left-radius: 4px;
+      background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    }
+    .chat-msg.pending { color: var(--muted); font-style: italic; }
+    .chat-form { display: flex; gap: 8px; align-items: flex-end; }
+    .chat-form textarea {
+      flex: 1; min-width: 0; resize: none; max-height: 120px;
+      padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+      background: var(--bg); color: var(--text); font: inherit;
+    }
+    .chat-form textarea::placeholder { color: var(--muted); opacity: 1; }
+    .chat-form textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .chat-send {
+      flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px;
+      border: none; cursor: pointer;
+      background: var(--accent); color: var(--on-accent);
+      display: grid; place-items: center;
+    }
+    .chat-send:disabled { opacity: 0.6; cursor: wait; }
+    .chat-send svg { width: 20px; height: 20px; fill: currentColor; }
+    .chat-clear {
+      align-self: flex-start; margin-top: 10px; padding: 4px 0;
+      border: none; background: none; cursor: pointer;
+      color: var(--muted); font: inherit; font-size: 0.9rem; text-decoration: underline;
+    }
+    .chat-clear:hover { color: var(--accent); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .corner-btn { transition: none; }
+    }
+
     @media (max-width: 600px) {
+      .corner-btn { right: 14px; width: 48px; height: 48px; }
       header { padding: 48px 16px 32px; }
       header h1 { font-size: 1.7rem; }
       section { padding: 22px 18px; }
@@ -440,6 +533,29 @@
     <span lang="en">© 2026 · School of Informatics, AUTH</span>
   </footer>
 
+  <!-- Κουμπί στη γωνία και το παράθυρο που ανοίγει -->
+  <button type="button" id="corner-btn" class="corner-btn" aria-haspopup="dialog" aria-controls="info-dialog">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm3 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm5 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm5 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
+  </button>
+
+  <dialog id="info-dialog" class="info-dialog" aria-labelledby="info-dialog-title">
+    <button type="button" id="dialog-close" class="dialog-close">×</button>
+    <h2 id="info-dialog-title"><span lang="el">Συνομιλία</span><span lang="en">Chat</span></h2>
+
+    <!-- Το ιστορικό της συνομιλίας: το γεμίζει η renderChat() από το chatState -->
+    <ol id="chat-log" class="chat-log" aria-live="polite"></ol>
+
+    <form id="chat-form" class="chat-form">
+      <textarea id="chat-input" rows="1" maxlength="1000" required></textarea>
+      <button type="submit" id="chat-send" class="chat-send">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20.5 21 12 3 3.5l2.5 8.5L3 20.5zm2.9-7.5h7.6v-2H5.9l-1-3.4L16.3 12 4.9 16.4l1-3.4z"/></svg>
+      </button>
+    </form>
+    <button type="button" id="chat-clear" class="chat-clear">
+      <span lang="el">Νέα συνομιλία</span><span lang="en">New chat</span>
+    </button>
+  </dialog>
+
   <script>
     // Αλλαγή γλώσσας Ελληνικά / Αγγλικά
     const langBtn = document.getElementById('lang-toggle');
@@ -454,13 +570,31 @@
         name: 'π.χ. Γιώργος Παπαδόπουλος',
         phone: 'π.χ. 69XXXXXXXX',
         email: 'π.χ. onoma@example.com',
-        reason: 'Γράψτε τον λόγο που επικοινωνείτε μαζί μου...'
+        reason: 'Γράψτε τον λόγο που επικοινωνείτε μαζί μου...',
+        'chat-input': 'Γράψτε ένα μήνυμα...'
       },
       en: {
         name: 'e.g. John Smith',
         phone: 'e.g. +30 69XXXXXXXX',
         email: 'e.g. name@example.com',
-        reason: 'Tell me why you are getting in touch...'
+        reason: 'Tell me why you are getting in touch...',
+        'chat-input': 'Type a message...'
+      }
+    };
+
+    // Ετικέτες (aria-label) για κουμπιά χωρίς κείμενο, για screen readers
+    const ariaLabels = {
+      el: {
+        'corner-btn': 'Άνοιγμα συνομιλίας',
+        'dialog-close': 'Κλείσιμο',
+        'chat-send': 'Αποστολή μηνύματος',
+        'chat-input': 'Μήνυμα'
+      },
+      en: {
+        'corner-btn': 'Open chat',
+        'dialog-close': 'Close',
+        'chat-send': 'Send message',
+        'chat-input': 'Message'
       }
     };
 
@@ -470,6 +604,9 @@
       document.title = titles[lang];
       for (const id in placeholders[lang]) {
         document.getElementById(id).placeholder = placeholders[lang][id];
+      }
+      for (const id in ariaLabels[lang]) {
+        document.getElementById(id).setAttribute('aria-label', ariaLabels[lang][id]);
       }
       try { localStorage.setItem('lang', lang); } catch (e) {}
     }
@@ -482,6 +619,7 @@
     langBtn.addEventListener('click', () => {
       setLang(document.documentElement.lang === 'el' ? 'en' : 'el');
       clearErrors();
+      renderChat();  // το μήνυμα καλωσορίσματος αλλάζει γλώσσα
     });
 
     // Αλλαγή θέματος Σκούρο / Ανοιχτό
@@ -510,6 +648,162 @@
     });
 
     systemDark.addEventListener('change', updateThemeIcon);
+
+    // ===== Κουμπί στη γωνία και παράθυρο =====
+    // Το κουμπί μένει πάντα κάτω από το μενού, όποιο ύψος κι αν έχει (σε κινητό το μενού πιάνει 2 γραμμές)
+    const nav = document.querySelector('nav');
+    const setNavHeight = () =>
+      document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
+    setNavHeight();
+    window.addEventListener('resize', setNavHeight);
+
+    // ===== Συνομιλία: κατάσταση και ιστορικό =====
+    // Όλη η συνομιλία ζει στο chatState. Κάθε αλλαγή περνάει από τις addMessage / clearChat / setPending,
+    // που αποθηκεύουν στο localStorage και ξαναζωγραφίζουν με την renderChat().
+    const CHAT_KEY = 'chat-history';
+    const CHAT_MAX = 50;          // κρατάμε μόνο τα τελευταία 50 μηνύματα
+    const CHAT_MAX_LEN = 1000;    // μέγιστο μήκος μηνύματος
+
+    const chatText = {
+      el: {
+        welcome: 'Γεια σας! Γράψτε μου ό,τι θέλετε να ρωτήσετε.',
+        pending: 'Γράφει...',
+        reply: 'Ευχαριστώ για το μήνυμα! Η αυτόματη απάντηση δεν είναι ακόμα διαθέσιμη. Μπορείτε να μου στείλετε και μέσω της φόρμας επικοινωνίας.',
+        error: 'Κάτι πήγε στραβά. Δοκιμάστε ξανά.'
+      },
+      en: {
+        welcome: 'Hi! Write me anything you would like to ask.',
+        pending: 'Typing...',
+        reply: 'Thanks for your message! Automatic replies are not available yet. You can also reach me through the contact form.',
+        error: 'Something went wrong. Please try again.'
+      }
+    };
+    const ct = key => chatText[document.documentElement.lang][key];
+
+    const isValidMsg = m =>
+      m && (m.role === 'user' || m.role === 'assistant') &&
+      typeof m.text === 'string' && m.text.length > 0 && m.text.length <= CHAT_MAX_LEN * 2;
+
+    // Φόρτωση με έλεγχο: αν το localStorage έχει κάτι χαλασμένο, ξεκινάμε από κενή συνομιλία
+    function loadChat() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(CHAT_KEY));
+        return Array.isArray(saved) ? saved.filter(isValidMsg).slice(-CHAT_MAX) : [];
+      } catch (e) { return []; }
+    }
+    function saveChat() {
+      try {
+        if (chatState.messages.length) localStorage.setItem(CHAT_KEY, JSON.stringify(chatState.messages));
+        else localStorage.removeItem(CHAT_KEY);
+      } catch (e) {}
+    }
+
+    const chatState = { messages: loadChat(), pending: false };
+
+    function addMessage(role, text) {
+      chatState.messages.push({ role, text, ts: Date.now() });
+      if (chatState.messages.length > CHAT_MAX) chatState.messages.splice(0, chatState.messages.length - CHAT_MAX);
+      saveChat();
+      renderChat();
+    }
+    function clearChat() {
+      chatState.messages = [];
+      saveChat();
+      renderChat();
+    }
+    function setPending(value) {
+      chatState.pending = value;
+      renderChat();
+    }
+
+    const chatLog = document.getElementById('chat-log');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send');
+    const chatClear = document.getElementById('chat-clear');
+
+    // Ζωγραφίζει το ιστορικό από την κατάσταση. textContent (όχι innerHTML), ώστε να μην εκτελείται HTML από μηνύματα.
+    function renderChat() {
+      const bubble = (role, text, extra) => {
+        const li = document.createElement('li');
+        li.className = 'chat-msg ' + role + (extra ? ' ' + extra : '');
+        li.textContent = text;
+        return li;
+      };
+      chatLog.replaceChildren();
+      if (!chatState.messages.length) chatLog.append(bubble('assistant', ct('welcome')));
+      for (const m of chatState.messages) chatLog.append(bubble(m.role, m.text));
+      if (chatState.pending) chatLog.append(bubble('assistant', ct('pending'), 'pending'));
+      chatSend.disabled = chatState.pending;
+      chatClear.hidden = chatState.messages.length === 0;
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    // Η απάντηση στο μήνυμα. Παίρνει όλο το ιστορικό, ώστε αργότερα να συνδεθεί με πραγματικό bot
+    // (π.χ. fetch σε server) χωρίς να αλλάξει τίποτα άλλο. Προς το παρόν δίνει μια σταθερή απάντηση.
+    async function getReply(history) {
+      await new Promise(resolve => setTimeout(resolve, 600));
+      return ct('reply');
+    }
+
+    async function sendMessage(text) {
+      text = text.trim().slice(0, CHAT_MAX_LEN);
+      if (!text || chatState.pending) return;
+      addMessage('user', text);
+      setPending(true);
+      let reply;
+      try { reply = await getReply(chatState.messages.slice()); }
+      catch (e) { reply = ct('error'); }
+      chatState.pending = false;
+      addMessage('assistant', reply);
+    }
+
+    chatForm.addEventListener('submit', e => {
+      e.preventDefault();
+      if (chatState.pending || !chatInput.value.trim()) return;  // το κείμενο μένει στο πεδίο
+      const text = chatInput.value;
+      chatInput.value = '';
+      chatInput.style.height = '';
+      sendMessage(text);
+    });
+    // Enter στέλνει, Shift+Enter αλλάζει γραμμή
+    chatInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        chatForm.requestSubmit();
+      }
+    });
+    // Το πεδίο μεγαλώνει όσο γράφεις (μέχρι το max-height του CSS)
+    chatInput.addEventListener('input', () => {
+      chatInput.style.height = 'auto';
+      chatInput.style.height = chatInput.scrollHeight + 'px';
+    });
+    chatClear.addEventListener('click', () => { clearChat(); chatInput.focus(); });
+
+    // Αν η σελίδα είναι ανοιχτή σε δύο καρτέλες, κρατάμε το ιστορικό ίδιο και στις δύο
+    window.addEventListener('storage', e => {
+      if (e.key !== CHAT_KEY) return;
+      chatState.messages = loadChat();
+      renderChat();
+    });
+
+    renderChat();
+
+    const cornerBtn = document.getElementById('corner-btn');
+    const infoDialog = document.getElementById('info-dialog');
+    cornerBtn.addEventListener('click', () => {
+      infoDialog.showModal();
+      renderChat();
+      chatInput.focus();
+    });
+    document.getElementById('dialog-close').addEventListener('click', () => infoDialog.close());
+    // Κλείνει και με κλικ έξω από το παράθυρο (στο σκούρο φόντο). Το Esc το χειρίζεται ο browser.
+    infoDialog.addEventListener('click', e => {
+      if (e.target !== infoDialog) return;
+      const r = infoDialog.getBoundingClientRect();
+      const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (!inside) infoDialog.close();
+    });
 
     // ===== Φόρμα επικοινωνίας =====
     // Τα μηνύματα έρχονται στο email σου μέσω της δωρεάν υπηρεσίας FormSubmit
