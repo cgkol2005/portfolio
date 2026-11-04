@@ -39,7 +39,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Η επιλογή θέματος αποθηκεύεται στο `localStorage.theme`.
 
 ## Συνομιλία (chat)
-- **Browser (`chat.js`):** όλη η κατάσταση ζει στο `chatState` και αλλάζει μόνο μέσω των `addMessage`, `clearChat` και `setPending`, που αποθηκεύουν στο `localStorage['chat-history']` και καλούν την `render()`.
+- **Browser (`chat.js`):** όλη η κατάσταση ζει στο `chatState` και αλλάζει μόνο μέσω των `addMessage`, `clearChat` και `setPending`, που αποθηκεύουν στο `sessionStorage['chat-history']` και καλούν την `render()`.
+  - **sessionStorage, όχι localStorage:** η συνομιλία σβήνει όταν κλείσει η καρτέλα, ώστε κάθε νέος επισκέπτης να ξεκινά καινούρια, ακόμη και σε κοινόχρηστο υπολογιστή. Ο server δεν αποθηκεύει συνομιλίες.
   - Τα μηνύματα σφάλματος που δημιουργούνται τοπικά έχουν `local: true` και δεν στέλνονται στον server.
   - Τα κείμενα βρίσκονται στο `chatText` (el/en). Όταν αλλάζει το `<html lang>`, ένας `MutationObserver` ενημερώνει τα κείμενα της συνομιλίας.
 - **Server (`functions/api/chat.js`):** διαβάζει το `index.html` μέσω `env.ASSETS` και κρατά μόνο το ορατό κείμενο (`extractPageText`). Στέλνει αυτό το κείμενο στο `claude-opus-5-5` (effort `low`, `fallbacks: 'default'`) με οδηγία να απαντά **μόνο** από αυτό.

@@ -1,6 +1,8 @@
 // Συνομιλία (chat) του portfolio.
 // - Κουμπί στη γωνία που ανοίγει παράθυρο συνομιλίας.
-// - Όλη η συνομιλία ζει στο chatState· αποθηκεύεται στο localStorage και επανέρχεται μετά από reload.
+// - Όλη η συνομιλία ζει στο chatState· αποθηκεύεται στο sessionStorage: μένει μετά από reload,
+//   αλλά σβήνει όταν κλείσει η καρτέλα. Κάθε νέος επισκέπτης / νέα καρτέλα ξεκινά νέα συνομιλία,
+//   ακόμη και σε κοινόχρηστο υπολογιστή. Ο server δεν κρατά καμία συνομιλία.
 // - Οι ερωτήσεις πηγαίνουν στο /api/chat (functions/api/chat.js), που απαντά ΜΟΝΟ με βάση το index.html.
 // - Όρια: ερώτηση έως 300 χαρακτήρες (εδώ και στον server), απάντηση έως 500 (στον server).
 (() => {
@@ -60,17 +62,20 @@
     typeof m.text === 'string' && m.text.length > 0 &&
     m.text.length <= (m.role === 'user' ? MAX_QUESTION : MAX_ANSWER);
 
-  // Φόρτωση με έλεγχο: ό,τι χαλασμένο ή άγνωστο υπάρχει στο localStorage αγνοείται
+  // Σβήνουμε ό,τι είχε μείνει από την παλιά έκδοση, που κρατούσε τη συνομιλία μόνιμα στο localStorage
+  try { localStorage.removeItem(CHAT_KEY); } catch (e) {}
+
+  // Φόρτωση με έλεγχο: ό,τι χαλασμένο ή άγνωστο υπάρχει στο sessionStorage αγνοείται
   function loadChat() {
     try {
-      const saved = JSON.parse(localStorage.getItem(CHAT_KEY));
+      const saved = JSON.parse(sessionStorage.getItem(CHAT_KEY));
       return Array.isArray(saved) ? saved.filter(isValidMsg).slice(-CHAT_MAX) : [];
     } catch (e) { return []; }
   }
   function saveChat() {
     try {
-      if (chatState.messages.length) localStorage.setItem(CHAT_KEY, JSON.stringify(chatState.messages));
-      else localStorage.removeItem(CHAT_KEY);
+      if (chatState.messages.length) sessionStorage.setItem(CHAT_KEY, JSON.stringify(chatState.messages));
+      else sessionStorage.removeItem(CHAT_KEY);
     } catch (e) {}
   }
 
@@ -220,13 +225,6 @@
 
   // Όταν αλλάζει η γλώσσα της σελίδας (κουμπί EN/ΕΛ), αλλάζουν και τα κείμενα της συνομιλίας
   new MutationObserver(applyLanguage).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-
-  // Αν η σελίδα είναι ανοιχτή σε δύο καρτέλες, το ιστορικό μένει ίδιο και στις δύο
-  window.addEventListener('storage', e => {
-    if (e.key !== CHAT_KEY) return;
-    chatState.messages = loadChat();
-    render();
-  });
 
   applyLanguage();
   updateCounter();
