@@ -476,6 +476,7 @@
 
     let savedLang = 'el';
     try { savedLang = localStorage.getItem('lang') || 'el'; } catch (e) {}
+    if (!(savedLang in titles)) savedLang = 'el';  // άγνωστη τιμή → Ελληνικά
     setLang(savedLang);
 
     langBtn.addEventListener('click', () => {
