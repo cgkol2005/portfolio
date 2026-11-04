@@ -1,0 +1,36 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: cloudflare-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # Ανεβαίνουν μόνο τα αρχεία της σελίδας (html + εικόνες στη ρίζα),
+      # όχι CLAUDE.md, .claude/, .github/ κ.λπ.
+      - name: Collect site files
+        run: |
+          mkdir dist
+          find . -maxdepth 1 -type f \( -iname '*.html' -o -iname '*.jpg' -o -iname '*.jpeg' \
+            -o -iname '*.png' -o -iname '*.svg' -o -iname '*.ico' -o -iname '*.webp' -o -iname '*.gif' \) \
+            -exec cp {} dist/ \;
+          test -f dist/index.html
+          ls -l dist
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: e0a30de04a34897cb089e2d96bc0fa58
+          command: pages deploy dist --project-name=portfolio-gkolfos --branch=main --commit-dirty=true

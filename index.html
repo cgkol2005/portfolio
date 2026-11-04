@@ -12,6 +12,7 @@
       --muted: #5b6577;
       --accent: #8b1d2c;      /* μπορντό, χρώμα ΑΠΘ */
       --accent-soft: #f6e9eb;
+      --on-accent: #ffffff;   /* κείμενο πάνω σε φόντο accent */
       --border: #e3e6ec;
       --success: #1f7a4d;
       --error: #b3261e;
@@ -25,6 +26,7 @@
         --muted: #9aa3b2;
         --accent: #e0707f;
         --accent-soft: #2a1d22;
+        --on-accent: #12151b;
         --border: #2a303b;
         --success: #5fcf95;
         --error: #f28b82;
@@ -38,6 +40,7 @@
       --muted: #9aa3b2;
       --accent: #e0707f;
       --accent-soft: #2a1d22;
+      --on-accent: #12151b;
       --border: #2a303b;
       --success: #5fcf95;
       --error: #f28b82;
@@ -80,7 +83,7 @@
       background: transparent; color: var(--accent);
       font: inherit; font-weight: 700; cursor: pointer;
     }
-    #lang-toggle:hover { background: var(--accent); color: #fff; }
+    #lang-toggle:hover { background: var(--accent); color: var(--on-accent); }
 
     /* Κουμπί σκούρου / ανοιχτού θέματος */
     #theme-toggle {
@@ -139,7 +142,7 @@
       border: 1.5px solid var(--accent); border-radius: 8px;
       color: var(--accent); text-decoration: none; font-weight: 600;
     }
-    .project-link:hover { background: var(--accent); color: #fff; }
+    .project-link:hover { background: var(--accent); color: var(--on-accent); }
     .project-link svg { width: 18px; height: 18px; fill: currentColor; }
 
     .contact-list { list-style: none; display: grid; gap: 12px; margin-bottom: 24px; }
@@ -168,6 +171,8 @@
       transition: border-color 0.15s, box-shadow 0.15s;
     }
     .field textarea { min-height: 140px; resize: vertical; }
+    .field input::placeholder,
+    .field textarea::placeholder { color: var(--muted); opacity: 1; }
     .field input:focus,
     .field textarea:focus {
       outline: none;
@@ -185,7 +190,7 @@
       justify-self: start;
       padding: 12px 32px;
       border: none; border-radius: 8px;
-      background: var(--accent); color: #fff;
+      background: var(--accent); color: var(--on-accent);
       font: inherit; font-weight: 700; cursor: pointer;
       transition: opacity 0.15s, transform 0.15s;
     }

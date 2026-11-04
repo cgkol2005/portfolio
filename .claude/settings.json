@@ -1,4 +1,16 @@
 {
+  "permissions": {
+    "ask": [
+      "Bash(git push*)",
+      "PowerShell(git push*)",
+      "Bash(npx wrangler*)",
+      "PowerShell(npx wrangler*)",
+      "Bash(wrangler*)",
+      "PowerShell(wrangler*)",
+      "Bash(node .claude/hooks/deploy.js*)",
+      "PowerShell(node .claude/hooks/deploy.js*)"
+    ]
+  },
   "hooks": {
     "PostToolUse": [
       {
@@ -9,30 +21,12 @@
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-lang.js\"",
             "timeout": 15,
             "statusMessage": "Έλεγχος EL/EN..."
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
+          },
           {
             "type": "command",
-            "if": "Bash(git push*)",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/deploy.js\"",
-            "timeout": 180,
-            "statusMessage": "Deploy στο Cloudflare Pages..."
-          }
-        ]
-      },
-      {
-        "matcher": "PowerShell",
-        "hooks": [
-          {
-            "type": "command",
-            "if": "PowerShell(git push*)",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/deploy.js\"",
-            "timeout": 180,
-            "statusMessage": "Deploy στο Cloudflare Pages..."
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-contrast.js\"",
+            "timeout": 15,
+            "statusMessage": "Έλεγχος αντίθεσης χρωμάτων..."
           }
         ]
       }
