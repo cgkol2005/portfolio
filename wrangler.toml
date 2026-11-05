@@ -1,0 +1,10 @@
+# Ρυθμίσεις Cloudflare Pages για το portfolio.
+# Το ANTHROPIC_API_KEY ΔΕΝ μπαίνει εδώ: είναι secret
+#   (npx wrangler pages secret put ANTHROPIC_API_KEY --project-name portfolio-gkolfos)
+# και τοπικά στο .dev.vars (που είναι στο .gitignore).
+name = "portfolio-gkolfos"
+compatibility_date = "2026-10-01"
+
+# Ο φάκελος που ανεβαίνει. Το GitHub Actions φτιάχνει το dist/ μόνο με τα αρχεία
+# της σελίδας, ώστε να μην ανέβουν δημόσια τα CLAUDE.md, .claude/ κ.λπ.
+pages_build_output_dir = "dist"

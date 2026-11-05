@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `index.html`: όλο το περιεχόμενο, με inline CSS και JS (γλώσσα, θέμα, φόρμα επικοινωνίας).
 - `chat.js` / `chat.css`: η συνομιλία (κουμπί στη γωνία, παράθυρο, ιστορικό).
 - `functions/api/chat.js`: Cloudflare Pages Function `POST /api/chat`, που απαντά με το Claude API.
+- `wrangler.toml`: ρυθμίσεις Cloudflare Pages (όνομα project, `compatibility_date`, `pages_build_output_dir = "dist"`). Δεν περιέχει secrets.
 - `package.json`: υπάρχει μόνο για το `@anthropic-ai/sdk` της συνάρτησης. Το `.claude/package.json` (`"type": "commonjs"`) κρατά τα scripts των hooks σε CommonJS. **Μην το σβήσεις**, γιατί χωρίς αυτό σταματούν όλοι οι έλεγχοι.
 
 ## Εντολές

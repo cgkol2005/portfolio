@@ -134,32 +134,58 @@ export function limitAnswer(text) {
 }
 
 // ---------------------------------------------------------------------------
-// Handler
+// Σφάλματα: κάθε βήμα «πετάει» ChatError με το HTTP status και έναν κωδικό,
+// και η sendReply το στέλνει στον browser ως { "error": "<κωδικός>" }.
 // ---------------------------------------------------------------------------
-export async function onRequestPost({ request, env }) {
-  // Μόνο από την ίδια τη σελίδα (όχι από άλλα sites)
-  const origin = request.headers.get('Origin');
-  if (origin && new URL(origin).host !== new URL(request.url).host) return json(403, { error: 'forbidden' });
+class ChatError extends Error {
+  constructor(status, code) {
+    super(code);
+    this.status = status;
+    this.code = code;
+  }
+}
 
-  if (!env.ANTHROPIC_API_KEY) return json(503, { error: 'not_configured' });
+// ---------------------------------------------------------------------------
+// 1. Ανάγνωση της ερώτησης
+//    Ελέγχει ότι το αίτημα έρχεται από την ίδια τη σελίδα, διαβάζει το JSON
+//    και επιστρέφει το ιστορικό (η τελευταία ερώτηση έως 300 χαρακτήρες) και τη γλώσσα.
+// ---------------------------------------------------------------------------
+async function readQuestion(request) {
+  const origin = request.headers.get('Origin');
+  if (origin && new URL(origin).host !== new URL(request.url).host) throw new ChatError(403, 'forbidden');
 
   const raw = await request.text();
-  if (raw.length > MAX_BODY_BYTES) return json(413, { error: 'too_large' });
+  if (raw.length > MAX_BODY_BYTES) throw new ChatError(413, 'too_large');
+
   let body;
-  try { body = JSON.parse(raw); } catch (e) { return json(400, { error: 'bad_request' }); }
+  try { body = JSON.parse(raw); } catch (e) { throw new ChatError(400, 'bad_request'); }
 
   const checked = validate(body);
-  if (checked.error) return json(400, { error: checked.error });
-  const { messages, lang } = checked;
+  if (checked.error) throw new ChatError(400, checked.error);
+  return checked;   // { messages, lang }
+}
 
-  let pageText;
-  try { pageText = await getPageText(request, env); }
-  catch (e) { console.error(e); return json(500, { error: 'server_error' }); }
+// ---------------------------------------------------------------------------
+// 2. Ανάγνωση του κλειδιού
+//    Το ANTHROPIC_API_KEY είναι secret του Cloudflare Pages· δεν φτάνει ποτέ στον browser.
+// ---------------------------------------------------------------------------
+function readApiKey(env) {
+  const apiKey = env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new ChatError(503, 'not_configured');
+  return apiKey;
+}
 
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: 25000, maxRetries: 1 });
+// ---------------------------------------------------------------------------
+// 3. Κλήση στο Claude API
+//    Στέλνει τις οδηγίες + το κείμενο της σελίδας + το ιστορικό, και επιστρέφει
+//    το κείμενο της απάντησης (έως 500 χαρακτήρες).
+// ---------------------------------------------------------------------------
+async function callClaude(apiKey, messages, lang, pageText) {
+  const client = new Anthropic({ apiKey, timeout: 25000, maxRetries: 1 });
 
+  let response;
   try {
-    const response = await client.beta.messages.create({
+    response = await client.beta.messages.create({
       model: MODEL,
       max_tokens: 1024,                       // περιθώριο για σκέψη + απάντηση έως 500 χαρακτήρες
       output_config: { effort: 'low' },       // σύντομες απαντήσεις συνομιλίας
@@ -174,23 +200,49 @@ export async function onRequestPost({ request, env }) {
         { role: 'system', content: `Interface language: ${lang === 'en' ? 'English' : 'Greek'}.` }
       ]
     });
-
-    if (response.stop_reason === 'refusal') return json(200, { reply: FALLBACK_TEXT[lang].refusal });
-
-    const text = response.content
-      .filter(block => block.type === 'text')
-      .map(block => block.text)
-      .join('')
-      .trim();
-    if (!text) return json(200, { reply: FALLBACK_TEXT[lang].empty });
-
-    return json(200, { reply: limitAnswer(text) });
   } catch (err) {
-    if (err instanceof Anthropic.RateLimitError) return json(429, { error: 'busy' });
-    if (err instanceof Anthropic.AuthenticationError) { console.error('Anthropic auth error'); return json(503, { error: 'not_configured' }); }
-    if (err instanceof Anthropic.APIConnectionError) { console.error(err); return json(502, { error: 'upstream_unreachable' }); }
-    if (err instanceof Anthropic.APIError) { console.error(err.status, err.message); return json(502, { error: 'upstream_error' }); }
-    console.error(err);
-    return json(500, { error: 'server_error' });
+    if (err instanceof Anthropic.RateLimitError) throw new ChatError(429, 'busy');
+    if (err instanceof Anthropic.AuthenticationError) { console.error('Anthropic auth error'); throw new ChatError(503, 'not_configured'); }
+    if (err instanceof Anthropic.APIConnectionError) { console.error(err); throw new ChatError(502, 'upstream_unreachable'); }
+    if (err instanceof Anthropic.APIError) { console.error(err.status, err.message); throw new ChatError(502, 'upstream_error'); }
+    throw err;
+  }
+
+  if (response.stop_reason === 'refusal') return FALLBACK_TEXT[lang].refusal;
+
+  const text = response.content
+    .filter(block => block.type === 'text')
+    .map(block => block.text)
+    .join('')
+    .trim();
+  if (!text) return FALLBACK_TEXT[lang].empty;
+
+  return limitAnswer(text);
+}
+
+// ---------------------------------------------------------------------------
+// 4. Επιστροφή της απάντησης στον browser
+//    Κείμενο → 200 { "reply": "..." }.  ChatError → το status του { "error": "<κωδικός>" }.
+//    Οτιδήποτε άλλο (απρόβλεπτο σφάλμα) → 500 { "error": "server_error" }.
+// ---------------------------------------------------------------------------
+function sendReply(result) {
+  if (typeof result === 'string') return json(200, { reply: result });
+  if (result instanceof ChatError) return json(result.status, { error: result.code });
+  console.error(result);
+  return json(500, { error: 'server_error' });
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/chat: τα τέσσερα βήματα με τη σειρά
+// ---------------------------------------------------------------------------
+export async function onRequestPost({ request, env }) {
+  try {
+    const { messages, lang } = await readQuestion(request);              // 1. ερώτηση
+    const apiKey = readApiKey(env);                                      // 2. κλειδί
+    const pageText = await getPageText(request, env);
+    const reply = await callClaude(apiKey, messages, lang, pageText);    // 3. Claude API
+    return sendReply(reply);                                             // 4. απάντηση
+  } catch (err) {
+    return sendReply(err);
   }
 }
