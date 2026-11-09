@@ -48,6 +48,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Ό,τι προστίθεται στη σελίδα το «ξέρει» αυτόματα το chat. Ό,τι δεν γράφεται στη σελίδα (π.χ. ηλικία, τηλέφωνο) δεν το λέει.
 - **Όρια:** ερώτηση έως **300** χαρακτήρες (`maxlength` και έλεγχος στο `chat.js`, και 400 `question_too_long` από τον server). Απάντηση έως **500** χαρακτήρες (οδηγία στο prompt και `limitAnswer()` στον server).
   - Αν αλλάξουν, πρέπει να αλλάξουν μαζί: `MAX_QUESTION` / `MAX_ANSWER` και στα δύο αρχεία, το `maxlength`, το «0/300» στο HTML και τα κείμενα `tooLong` / `label-chat-input`.
+- **Όριο ερωτήσεων ανά IP:** έως **10/λεπτό** και **50/ημέρα** (ημερολογιακή ημέρα ώρας Ελλάδας). Αν ξεπεραστεί: 429 `{ error: 'rate_limited', limit: 'minute'|'day', message }` με `Retry-After`, και το chat δείχνει τα `limitMinute` / `limitDay` του `chatText`.
+  - Μετρά στη βάση **D1 `portfolio-chat`** (binding `DB` στο `wrangler.toml`, πίνακας `rate_limits` από το `migrations/`), μέσα στην `checkRateLimit()`. Στο `pages.dev` δεν υπάρχουν κανόνες rate limiting του Cloudflare (θέλουν δικό μας domain).
+  - Αποθηκεύεται μόνο SHA-256 της IP (IPv6: όλο το /64). Οι ερωτήσεις που απορρίπτονται δεν μετρούν. Αν λείπει ή αποτύχει η βάση, το chat δουλεύει χωρίς όριο.
+  - Αν αλλάξουν τα όρια: `LIMIT_PER_MINUTE` / `LIMIT_PER_DAY` στο `functions/api/chat.js`, και τα κείμενα `limitMinute` / `limitDay` (που γράφουν «50») στο `FALLBACK_TEXT` και στο `chatText`.
+  - Νέο migration: αρχείο στο `migrations/` και `npx wrangler d1 migrations apply portfolio-chat --remote`.
+  - Μηδενισμός μετρητών (π.χ. μετά από δοκιμή): `npx wrangler d1 execute portfolio-chat --remote --command "DELETE FROM rate_limits"`.
 - **Κλειδί:** secret `ANTHROPIC_API_KEY` στο Cloudflare Pages. Ορίζεται από τον χρήστη με `npx wrangler pages secret put ANTHROPIC_API_KEY --project-name portfolio-gkolfos`. Χωρίς αυτό, το `/api/chat` επιστρέφει 503 και το chat γράφει «δεν είναι διαθέσιμη».
 
 ## Δεξιότητες

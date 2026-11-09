@@ -36,8 +36,16 @@ const writeFromHead = (file, dest) => {
 try {
   for (const f of siteFiles) writeFromHead(f, path.join(work, 'public', f));
   for (const f of functionFiles) writeFromHead(f, path.join(work, f));
+  // Το wrangler.toml φέρνει τα bindings (π.χ. τη βάση D1 "DB" για το όριο ερωτήσεων)·
+  // χωρίς αυτό το deploy θα έβγαινε χωρίς βάση. Ο φάκελος του output είναι το pages_build_output_dir.
+  let outDir = 'public';
+  if (all.includes('wrangler.toml')) {
+    writeFromHead('wrangler.toml', path.join(work, 'wrangler.toml'));
+    outDir = (fs.readFileSync(path.join(work, 'wrangler.toml'), 'utf8').match(/^pages_build_output_dir\s*=\s*"([^"]+)"/m) || [])[1] || outDir;
+    if (outDir !== 'public') fs.renameSync(path.join(work, 'public'), path.join(work, outDir));
+  }
 
-  const cmd = `npx --yes wrangler pages deploy public --project-name ${PROJECT} --branch main --commit-dirty=true`;
+  const cmd = `npx --yes wrangler pages deploy ${outDir} --project-name ${PROJECT} --branch main --commit-dirty=true`;
   const r = spawnSync(cmd, { cwd: work, shell: true, encoding: 'utf8', timeout: 170000 });
 
   const text = (r.stdout || '') + (r.stderr || '');

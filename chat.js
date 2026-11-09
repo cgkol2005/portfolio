@@ -4,7 +4,8 @@
 //   αλλά σβήνει όταν κλείσει η καρτέλα. Κάθε νέος επισκέπτης / νέα καρτέλα ξεκινά νέα συνομιλία,
 //   ακόμη και σε κοινόχρηστο υπολογιστή. Ο server δεν κρατά καμία συνομιλία.
 // - Οι ερωτήσεις πηγαίνουν στο /api/chat (functions/api/chat.js), που απαντά ΜΟΝΟ με βάση το index.html.
-// - Όρια: ερώτηση έως 300 χαρακτήρες (εδώ και στον server), απάντηση έως 500 (στον server).
+// - Όρια: ερώτηση έως 300 χαρακτήρες (εδώ και στον server), απάντηση έως 500 (στον server),
+//   έως 10 ερωτήσεις/λεπτό και 50/ημέρα ανά IP (στον server· εδώ μόνο το μήνυμα).
 (() => {
   const API_URL = '/api/chat';
   const CHAT_KEY = 'chat-history';
@@ -21,6 +22,8 @@
       pending: 'Γράφει...',
       tooLong: 'Η ερώτηση μπορεί να έχει έως 300 χαρακτήρες.',
       busy: 'Έχουν σταλεί πολλές ερωτήσεις. Δοκιμάστε ξανά σε λίγο.',
+      limitMinute: 'Έχετε κάνει πολλές ερωτήσεις σε λίγο χρόνο. Περιμένετε ένα λεπτό και δοκιμάστε ξανά. Ευχαριστώ για την υπομονή!',
+      limitDay: 'Φτάσατε το όριο των 50 ερωτήσεων για σήμερα. Ευχαριστώ πολύ για το ενδιαφέρον! Μπορείτε να ρωτήσετε ξανά αύριο ή να μου γράψετε μέσω της φόρμας επικοινωνίας.',
       unavailable: 'Η συνομιλία δεν είναι διαθέσιμη αυτή τη στιγμή. Μπορείτε να μου γράψετε μέσω της φόρμας επικοινωνίας.',
       error: 'Κάτι πήγε στραβά. Δοκιμάστε ξανά.',
       placeholder: 'Γράψτε την ερώτησή σας...',
@@ -33,6 +36,8 @@
       pending: 'Typing...',
       tooLong: 'Questions can be up to 300 characters long.',
       busy: 'Too many questions have been sent. Please try again in a moment.',
+      limitMinute: "You've asked a lot of questions in a short time. Please wait a minute and try again. Thanks for your patience!",
+      limitDay: "You've reached the limit of 50 questions for today. Thank you so much for your interest! You can ask again tomorrow or write to me through the contact form.",
       unavailable: 'The chat is not available right now. You can reach me through the contact form.',
       error: 'Something went wrong. Please try again.',
       placeholder: 'Type your question...',
@@ -151,7 +156,9 @@
       if (res.ok && typeof data.reply === 'string' && data.reply) {
         return { text: data.reply.slice(0, MAX_ANSWER) };
       }
+      // Όριο ερωτήσεων ανά IP (10/λεπτό, 50/ημέρα): το κείμενο σε όποια γλώσσα είναι τώρα ενεργή
       const key = res.status === 400 && data.error === 'question_too_long' ? 'tooLong'
+        : res.status === 429 && data.error === 'rate_limited' ? (data.limit === 'day' ? 'limitDay' : 'limitMinute')
         : res.status === 429 ? 'busy'
         : res.status === 503 || res.status === 404 ? 'unavailable'
         : 'error';

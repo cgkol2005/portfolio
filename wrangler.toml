@@ -8,3 +8,11 @@ compatibility_date = "2026-10-01"
 # Ο φάκελος που ανεβαίνει. Το GitHub Actions φτιάχνει το dist/ μόνο με τα αρχεία
 # της σελίδας, ώστε να μην ανέβουν δημόσια τα CLAUDE.md, .claude/ κ.λπ.
 pages_build_output_dir = "dist"
+
+# Βάση D1 για το όριο ερωτήσεων του chat (10/λεπτό, 50/ημέρα ανά IP).
+# Πίνακας: migrations/  →  npx wrangler d1 migrations apply portfolio-chat --remote
+# Το database_id δεν είναι secret.
+[[d1_databases]]
+binding = "DB"
+database_name = "portfolio-chat"
+database_id = "2afb1802-3055-437d-80af-5f1863a63e1b"

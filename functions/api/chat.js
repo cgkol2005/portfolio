@@ -1,11 +1,14 @@
 // Cloudflare Pages Function: POST /api/chat
 // Απαντά σε ερωτήσεις επισκεπτών για τον Χρήστο, ΜΟΝΟ με βάση το περιεχόμενο του index.html.
 //
-// Ρυθμίσεις στο Cloudflare: secret ANTHROPIC_API_KEY
-//   npx wrangler pages secret put ANTHROPIC_API_KEY --project-name portfolio-gkolfos
+// Ρυθμίσεις στο Cloudflare:
+//   - secret ANTHROPIC_API_KEY
+//       npx wrangler pages secret put ANTHROPIC_API_KEY --project-name portfolio-gkolfos
+//   - βάση D1 "portfolio-chat" (binding DB, στο wrangler.toml) για το όριο ερωτήσεων ανά IP
 //
 // Αίτημα:   { "messages": [{ "role": "user"|"assistant", "text": "..." }, ...], "lang": "el"|"en" }
 // Απάντηση: { "reply": "..." }  ή  { "error": "<κωδικός>" } με κατάλληλο HTTP status
+//           Όριο ερωτήσεων: 429 { "error": "rate_limited", "limit": "minute"|"day", "message": "..." } + Retry-After
 import Anthropic from '@anthropic-ai/sdk';
 
 const MODEL = 'claude-opus-5-5';
@@ -13,22 +16,29 @@ const MAX_QUESTION = 300;      // μέγιστο μήκος ερώτησης (χ
 const MAX_ANSWER = 500;        // μέγιστο μήκος απάντησης (χαρακτήρες)
 const MAX_HISTORY = 10;        // πόσα πρόσφατα μηνύματα κρατάμε ως πλαίσιο
 const MAX_BODY_BYTES = 16 * 1024;
+const LIMIT_PER_MINUTE = 10;   // ερωτήσεις ανά IP ανά λεπτό
+const LIMIT_PER_DAY = 50;      // ερωτήσεις ανά IP ανά ημέρα (ώρα Ελλάδας)
+const DAY_TIME_ZONE = 'Europe/Athens';
 
 const FALLBACK_TEXT = {
   el: {
     refusal: 'Συγγνώμη, δεν μπορώ να απαντήσω σε αυτή την ερώτηση. Μπορείτε να με ρωτήσετε για τις σπουδές, τις δεξιότητες ή τα projects του Χρήστου.',
-    empty: 'Συγγνώμη, δεν κατάφερα να σχηματίσω απάντηση. Δοκιμάστε να διατυπώσετε την ερώτηση λίγο διαφορετικά.'
+    empty: 'Συγγνώμη, δεν κατάφερα να σχηματίσω απάντηση. Δοκιμάστε να διατυπώσετε την ερώτηση λίγο διαφορετικά.',
+    limitMinute: 'Έχετε κάνει πολλές ερωτήσεις σε λίγο χρόνο. Περιμένετε ένα λεπτό και δοκιμάστε ξανά. Ευχαριστώ για την υπομονή!',
+    limitDay: 'Φτάσατε το όριο των 50 ερωτήσεων για σήμερα. Ευχαριστώ πολύ για το ενδιαφέρον! Μπορείτε να ρωτήσετε ξανά αύριο ή να μου γράψετε μέσω της φόρμας επικοινωνίας.'
   },
   en: {
     refusal: "Sorry, I can't answer that question. You can ask me about Christos's studies, skills or projects.",
-    empty: "Sorry, I couldn't put together an answer. Please try rephrasing your question."
+    empty: "Sorry, I couldn't put together an answer. Please try rephrasing your question.",
+    limitMinute: "You've asked a lot of questions in a short time. Please wait a minute and try again. Thanks for your patience!",
+    limitDay: "You've reached the limit of 50 questions for today. Thank you so much for your interest! You can ask again tomorrow or write to me through the contact form."
   }
 };
 
-const json = (status, body) =>
+const json = (status, body, headers = {}) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...headers }
   });
 
 // ---------------------------------------------------------------------------
@@ -138,10 +148,13 @@ export function limitAnswer(text) {
 // και η sendReply το στέλνει στον browser ως { "error": "<κωδικός>" }.
 // ---------------------------------------------------------------------------
 class ChatError extends Error {
-  constructor(status, code) {
+  // extra: επιπλέον πεδία για το JSON (π.χ. limit, message)· headers: π.χ. Retry-After
+  constructor(status, code, extra = {}, headers = {}) {
     super(code);
     this.status = status;
     this.code = code;
+    this.extra = extra;
+    this.headers = headers;
   }
 }
 
@@ -163,6 +176,81 @@ async function readQuestion(request) {
   const checked = validate(body);
   if (checked.error) throw new ChatError(400, checked.error);
   return checked;   // { messages, lang }
+}
+
+// ---------------------------------------------------------------------------
+// 1β. Όριο ερωτήσεων ανά IP: έως 10 ανά λεπτό και 50 ανά ημέρα (ώρα Ελλάδας).
+//     Μετρά στη βάση D1 (env.DB), γιατί στο pages.dev, χωρίς δικό μας domain,
+//     δεν υπάρχουν κανόνες rate limiting του Cloudflare.
+//     - Δεν αποθηκεύεται η IP, μόνο SHA-256 hash της. Για IPv6 μετρά όλο το /64.
+//     - Οι ερωτήσεις που απορρίπτονται δεν μετρούν.
+//     - Αν λείπει η βάση ή αποτύχει, η συνομιλία συνεχίζει χωρίς όριο.
+// ---------------------------------------------------------------------------
+export function clientKey(ip) {
+  if (!ip) return 'unknown';
+  if (!ip.includes(':')) return ip;                       // IPv4
+  // IPv6: αναπτύσσουμε το "::" και κρατάμε τα 4 πρώτα τμήματα (/64)
+  const [head, tail = ''] = ip.toLowerCase().split('::');
+  const h = head ? head.split(':') : [];
+  const t = tail ? tail.split(':') : [];
+  const full = ip.includes('::') ? [...h, ...Array(8 - h.length - t.length).fill('0'), ...t] : h;
+  return full.slice(0, 4).map(p => p.replace(/^0+(?=.)/, '')).join(':') + '::/64';
+}
+
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Η τρέχουσα ημέρα (YYYY-MM-DD) και τα ms ως τα μεσάνυχτα, στην ώρα Ελλάδας
+export function athensDay(now) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+    timeZone: DAY_TIME_ZONE, hourCycle: 'h23',
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'
+  }).formatToParts(new Date(now)).map(p => [p.type, p.value]));
+  const sinceMidnight = ((+parts.hour * 60 + +parts.minute) * 60 + +parts.second) * 1000 + now % 1000;
+  return { day: `${parts.year}-${parts.month}-${parts.day}`, msToMidnight: 86400000 - sinceMidnight };
+}
+
+async function checkRateLimit(request, env, lang, waitUntil, now = Date.now()) {
+  if (!env.DB) { console.error('Rate limit: no DB binding'); return; }
+  try {
+    const id = await sha256(clientKey(request.headers.get('CF-Connecting-IP')));
+    const minute = Math.floor(now / 60000);
+    const { day, msToMidnight } = athensDay(now);
+    const minuteKey = `${id}:m:${minute}`;
+    const dayKey = `${id}:d:${day}`;
+
+    const { results } = await env.DB
+      .prepare('SELECT key, count FROM rate_limits WHERE key IN (?1, ?2)')
+      .bind(minuteKey, dayKey).all();
+    const count = key => (results.find(r => r.key === key) || { count: 0 }).count;
+
+    let limit = null, retryAfter = 0;
+    if (count(dayKey) >= LIMIT_PER_DAY) { limit = 'day'; retryAfter = Math.ceil(msToMidnight / 1000); }
+    else if (count(minuteKey) >= LIMIT_PER_MINUTE) { limit = 'minute'; retryAfter = 60 - Math.floor((now % 60000) / 1000); }
+    if (limit) {
+      const message = FALLBACK_TEXT[lang][limit === 'day' ? 'limitDay' : 'limitMinute'];
+      throw new ChatError(429, 'rate_limited', { limit, message }, { 'Retry-After': String(retryAfter) });
+    }
+
+    const add = env.DB.prepare(
+      'INSERT INTO rate_limits (key, count, expires) VALUES (?1, 1, ?2) ' +
+      'ON CONFLICT(key) DO UPDATE SET count = count + 1');
+    await env.DB.batch([
+      add.bind(minuteKey, (minute + 2) * 60000),
+      add.bind(dayKey, now + msToMidnight + 3600000)
+    ]);
+
+    // Καθάρισμα παλιών μετρητών, σε περίπου 1 στα 20 αιτήματα, στο παρασκήνιο
+    if (waitUntil && Math.random() < 0.05) {
+      waitUntil(env.DB.prepare('DELETE FROM rate_limits WHERE expires < ?1').bind(now).run()
+        .catch(err => console.error('Rate limit cleanup:', err)));
+    }
+  } catch (err) {
+    if (err instanceof ChatError) throw err;
+    console.error('Rate limit check failed, allowing request:', err);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -227,7 +315,7 @@ async function callClaude(apiKey, messages, lang, pageText) {
 // ---------------------------------------------------------------------------
 function sendReply(result) {
   if (typeof result === 'string') return json(200, { reply: result });
-  if (result instanceof ChatError) return json(result.status, { error: result.code });
+  if (result instanceof ChatError) return json(result.status, { error: result.code, ...result.extra }, result.headers);
   console.error(result);
   return json(500, { error: 'server_error' });
 }
@@ -235,9 +323,10 @@ function sendReply(result) {
 // ---------------------------------------------------------------------------
 // POST /api/chat: τα τέσσερα βήματα με τη σειρά
 // ---------------------------------------------------------------------------
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   try {
     const { messages, lang } = await readQuestion(request);              // 1. ερώτηση
+    await checkRateLimit(request, env, lang, waitUntil);                 // 1β. όριο ανά IP
     const apiKey = readApiKey(env);                                      // 2. κλειδί
     const pageText = await getPageText(request, env);
     const reply = await callClaude(apiKey, messages, lang, pageText);    // 3. Claude API
