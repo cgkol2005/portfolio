@@ -28,8 +28,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Κάθε νέο ή αλλαγμένο κείμενο πρέπει να γραφτεί και στις δύο γλώσσες.**
 - Ό,τι δεν είναι HTML (placeholders, μηνύματα σφάλματος της φόρμας, `<title>`) υπάρχει σε JS objects με κλειδιά `el` / `en` (`titles`, placeholders, `messages`).
 - Η `setLang()` αλλάζει το `<html lang>`, και αυτό αρκεί για να εμφανιστεί η σωστή γλώσσα στο HTML. Τα κείμενα από JS (`<title>`, placeholders) τα ενημερώνει η ίδια, ενώ τα μηνύματα της φόρμας τα δίνει η `t(key)`.
-- Η επιλεγμένη γλώσσα αποθηκεύεται στο `localStorage.lang`. Η προεπιλογή είναι `el`.
-  Μια άγνωστη τιμή στο `localStorage.lang` (όχι `el`/`en`) γυρίζει σε `el`, πριν κληθεί η `setLang()`.
+- Η αρχική γλώσσα επιλέγεται από ένα μικρό `<script>` στο `<head>` (πριν σχεδιαστεί η σελίδα, για να μην «αναβοσβήνει»):
+  1. `localStorage.lang`, αν είναι `el`/`en` (επιλογή του επισκέπτη με το κουμπί),
+  2. αλλιώς η πρώτη από `el`/`en` στο `navigator.languages`,
+  3. αλλιώς `en` (ξένος επισκέπτης). Μια άγνωστη τιμή στο `localStorage.lang` αγνοείται.
+- Στο `localStorage.lang` γράφει μόνο το κλικ στο κουμπί (`setLang(lang, true)`), όχι η αυτόματη επιλογή.
+- Το `<html lang="el">` στο HTML είναι μόνο για όποιον δεν τρέχει JavaScript (π.χ. crawlers).
 
 ## Θέμα (light / dark)
 - Τα χρώματα ορίζονται ως CSS μεταβλητές στο `:root`. Για το dark υπάρχουν σε `@media (prefers-color-scheme: dark)` και `:root[data-theme="dark"]`.

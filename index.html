@@ -4,6 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Χρήστος Γκόλφος | Portfolio</title>
+  <script>
+    // Γλώσσα της σελίδας, πριν σχεδιαστεί (ώστε να μην «αναβοσβήνει» η άλλη γλώσσα):
+    // 1. αυτή που διάλεξε ο επισκέπτης με το κουμπί EN/ΕΛ (localStorage.lang),
+    // 2. αλλιώς η πρώτη από ελληνικά/αγγλικά στις γλώσσες του browser,
+    // 3. αλλιώς (π.χ. browser στα γερμανικά) αγγλικά.
+    (function () {
+      var lang = null;
+      try { lang = localStorage.getItem('lang'); } catch (e) {}
+      if (lang !== 'el' && lang !== 'en') {
+        var prefs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+        lang = 'en';
+        for (var i = 0; i < prefs.length; i++) {
+          var code = String(prefs[i]).toLowerCase().slice(0, 2);
+          if (code === 'el' || code === 'en') { lang = code; break; }
+        }
+      }
+      document.documentElement.lang = lang;
+    })();
+  </script>
   <style>
     :root {
       --bg: #f7f8fa;
@@ -492,23 +511,23 @@
       }
     };
 
-    function setLang(lang) {
+    // save: true μόνο όταν ο επισκέπτης πατά το κουμπί. Η γλώσσα του browser δεν αποθηκεύεται,
+    // ώστε να ισχύει πάντα η τρέχουσα ρύθμιση του browser, μέχρι να διαλέξει ο ίδιος.
+    function setLang(lang, save) {
       document.documentElement.lang = lang;
       langBtn.textContent = lang === 'el' ? 'EN' : 'ΕΛ';
       document.title = titles[lang];
       for (const id in placeholders[lang]) {
         document.getElementById(id).placeholder = placeholders[lang][id];
       }
-      try { localStorage.setItem('lang', lang); } catch (e) {}
+      if (save) { try { localStorage.setItem('lang', lang); } catch (e) {} }
     }
 
-    let savedLang = 'el';
-    try { savedLang = localStorage.getItem('lang') || 'el'; } catch (e) {}
-    if (!(savedLang in titles)) savedLang = 'el';  // άγνωστη τιμή → Ελληνικά
-    setLang(savedLang);
+    // Η γλώσσα έχει ήδη επιλεγεί από το script στο <head> (επιλογή του επισκέπτη ή γλώσσα του browser)
+    setLang(document.documentElement.lang === 'en' ? 'en' : 'el', false);
 
     langBtn.addEventListener('click', () => {
-      setLang(document.documentElement.lang === 'el' ? 'en' : 'el');
+      setLang(document.documentElement.lang === 'el' ? 'en' : 'el', true);
       clearErrors();
     });
 
