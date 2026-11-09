@@ -20,10 +20,11 @@
 - Έλεγχος της σελίδας online: σωστά κείμενα EL/EN, όλα τα αρχεία και links φορτώνουν, σωστή εμφάνιση σε κινητό, τα ιδιωτικά αρχεία (`CLAUDE.md`, `status.md`, `wrangler.toml`, `.claude/`) δεν είναι προσβάσιμα, το τηλέφωνο δεν εμφανίζεται πουθενά.
 
 ## Εκκρεμότητες
-1. **Προτάσεις από τον έλεγχο της σελίδας** (δεν έχουν γίνει):
+1. **Μεταφορά των projects στο GitHub.** Να ανέβουν στο GitHub (`cgkol2005`) τα projects **MyMarket** και **Client–Server Chat με Sockets**, και μετά να μπει στο portfolio το link του καθενός, με κουμπί «GitHub» όπως στο «Προσωπικό Portfolio» (`<a class="project-link" …>`).
+2. **Προτάσεις από τον έλεγχο της σελίδας** (δεν έχουν γίνει):
    - Δεν υπάρχει `meta description` και Open Graph, άρα δεν βγαίνει κάρτα προεπισκόπησης όταν στέλνεται το link (LinkedIn, Viber κ.λπ.). Χρειάζεται απόφαση για την εικόνα.
    - Δεν υπάρχει favicon.
    - Το project «Προσωπικό Portfolio» δεν αναφέρει το chat με AI (Claude API, Cloudflare Functions, D1, όριο ερωτήσεων).
    - Κάθε λάθος διεύθυνση δείχνει την αρχική σελίδα με 200, αντί για 404 (λείπει `404.html`).
    - Το `alt` του λογοτύπου ΑΠΘ είναι μόνο στα ελληνικά.
-2. **Το `npx wrangler pages dev .` δεν ξεκινά** μέσα από το Claude Code (`write EOF`, ο `workerd` δεν ξεκινά στο sandbox). Τοπικά τρέχει από το δικό σου τερματικό στο http://localhost:8788.
+3. **Το `npx wrangler pages dev .` δεν ξεκινά** μέσα από το Claude Code (`write EOF`, ο `workerd` δεν ξεκινά στο sandbox). Τοπικά τρέχει από το δικό σου τερματικό στο http://localhost:8788.
