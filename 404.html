@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>404 | Χρήστος Γκόλφος</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script>
+    // Ίδια λογική με το index.html: γλώσσα (localStorage.lang → browser → en) και θέμα (localStorage.theme)
+    (function () {
+      var lang = null, theme = null;
+      try { lang = localStorage.getItem('lang'); theme = localStorage.getItem('theme'); } catch (e) {}
+      if (lang !== 'el' && lang !== 'en') {
+        var prefs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+        lang = 'en';
+        for (var i = 0; i < prefs.length; i++) {
+          var code = String(prefs[i]).toLowerCase().slice(0, 2);
+          if (code === 'el' || code === 'en') { lang = code; break; }
+        }
+      }
+      document.documentElement.lang = lang;
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+      if (lang === 'en') document.title = '404 | Christos Gkolfos';
+    })();
+  </script>
+  <style>
+    /* Ίδια χρώματα με το index.html (αν αλλάξουν εκεί, αλλάζουν και εδώ) */
+    :root {
+      --bg: #f7f8fa;
+      --text: #1d2330;
+      --muted: #5b6577;
+      --accent: #8b1d2c;
+      --on-accent: #ffffff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #12151b;
+        --text: #e8ebf1;
+        --muted: #9aa3b2;
+        --accent: #e0707f;
+        --on-accent: #12151b;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #12151b;
+      --text: #e8ebf1;
+      --muted: #9aa3b2;
+      --accent: #e0707f;
+      --on-accent: #12151b;
+    }
+
+    html[lang="el"] [lang="en"], html[lang="en"] [lang="el"] { display: none; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      text-align: center;
+    }
+    .code { font-size: 96px; font-weight: 700; line-height: 1; color: var(--accent); }
+    h1 { font-size: 26px; margin: 16px 0 8px; }
+    p { color: var(--muted); max-width: 420px; margin: 0 auto 28px; }
+    .home {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--on-accent);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 10px;
+    }
+    .home:hover, .home:focus-visible { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="code" aria-hidden="true">404</div>
+    <h1><span lang="el">Η σελίδα δεν βρέθηκε</span><span lang="en">Page not found</span></h1>
+    <p lang="el">Η διεύθυνση που άνοιξες δεν υπάρχει. Ίσως έχει λάθος ή η σελίδα έχει μετακινηθεί.</p>
+    <p lang="en">The address you opened does not exist. It may be mistyped, or the page may have moved.</p>
+    <a class="home" href="/"><span lang="el">Επιστροφή στην αρχική</span><span lang="en">Back to the home page</span></a>
+  </main>
+</body>
+</html>

@@ -516,6 +516,13 @@
       en: 'Christos Gkolfos | Portfolio'
     };
 
+    // Κείμενο alt του λογοτύπου ΑΠΘ (για αναγνώστες οθόνης) σε κάθε γλώσσα
+    const uniLogo = document.querySelector('.uni-logo');
+    const logoAlt = {
+      el: 'Λογότυπο ΑΠΘ',
+      en: 'Aristotle University of Thessaloniki logo'
+    };
+
     // Placeholders της φόρμας σε κάθε γλώσσα
     const placeholders = {
       el: {
@@ -538,6 +545,7 @@
       document.documentElement.lang = lang;
       langBtn.textContent = lang === 'el' ? 'EN' : 'ΕΛ';
       document.title = titles[lang];
+      uniLogo.alt = logoAlt[lang];
       for (const id in placeholders[lang]) {
         document.getElementById(id).placeholder = placeholders[lang][id];
       }
