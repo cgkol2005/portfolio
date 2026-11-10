@@ -1,6 +1,6 @@
 # Κατάσταση του portfolio
 
-Τελευταία ενημέρωση: 2026-11-09
+Τελευταία ενημέρωση: 2026-11-10
 
 ## Online
 - Live: https://portfolio-gkolfos.pages.dev
@@ -8,7 +8,13 @@
 - Chat (`/api/chat`): **λειτουργεί**, με όριο **10 ερωτήσεις/λεπτό και 50/ημέρα ανά IP**.
 - Γλώσσα: η πρώτη επίσκεψη ανοίγει στη γλώσσα του browser.
 
-## Έγινε σήμερα
+## Έγινε σήμερα (2026-11-10)
+- **Τα projects έχουν link στο GitHub** (`eefa08d`): κουμπί «GitHub» στο MyMarket (https://github.com/cgkol2005/mymarket) και στο Client–Server Chat (https://github.com/cgkol2005/request-reply).
+- **Client–Server Chat με Sockets**: νέα περιγραφή (`eefa08d`), σύμφωνα με την οποία είναι κατανεμημένη εφαρμογή σε Java για τη διαχείριση και ανταλλαγή προσωπικών μηνυμάτων, με πρωτόκολλο request–reply μέσω TCP sockets. Νέα bullets (`da51d1f`), από το README και τον κώδικα του repo: threads ανά client, λογαριασμοί με auth token, αποστολή μηνυμάτων και εισερχόμενα, ανάγνωση και διαγραφή μηνυμάτων. Βγήκαν τα παλιά bullets για broadcast, συνδεδεμένους χρήστες και αποσυνδέσεις, γιατί η εφαρμογή δεν τα κάνει.
+- **MyMarket**: η περιγραφή αναφέρει ότι είναι σε Java (`6e3678f`). Το repo το δείχνει ως ομαδική εργασία δύο ατόμων, αλλά αποφασίστηκε να μη γραφτεί αυτό στο portfolio.
+- Όλα ελέγχθηκαν online και σε κινητό (ανοιχτό και σκούρο θέμα).
+
+## Έγινε στις 2026-11-09
 - Σβήστηκε το περιττό secret `ANTROPIC_API_KEY` από το Cloudflare Pages. Έμεινε μόνο το σωστό `ANTHROPIC_API_KEY`.
 - Το `wrangler` προστέθηκε ως devDependency (`286bff5`) και μετά αφαιρέθηκε ξανά (`7e1392e`), γιατί υπήρχε υποψία ότι χαλούσε το deploy. Δεν ήταν αυτή η αιτία. Τα `package.json` / `package-lock.json` είναι όπως στο `3aaab65` (μόνο `@anthropic-ai/sdk`).
 - **Το αυτόματο deploy (GitHub Actions) δουλεύει** από το `f42f541` και μετά, σε κάθε push. Πριν αποτύγχανε σε όλα τα runs. Η αιτία δεν βρέθηκε (μάλλον κάτι εκτός repo, π.χ. το `CLOUDFLARE_API_TOKEN`). Το χειροκίνητο deploy (`.claude/hooks/deploy.js`) δεν χρειάζεται πια, αλλά υπάρχει και παίρνει πλέον μαζί και το `wrangler.toml`.
@@ -20,11 +26,10 @@
 - Έλεγχος της σελίδας online: σωστά κείμενα EL/EN, όλα τα αρχεία και links φορτώνουν, σωστή εμφάνιση σε κινητό, τα ιδιωτικά αρχεία (`CLAUDE.md`, `status.md`, `wrangler.toml`, `.claude/`) δεν είναι προσβάσιμα, το τηλέφωνο δεν εμφανίζεται πουθενά.
 
 ## Εκκρεμότητες
-1. **Μεταφορά των projects στο GitHub.** Να ανέβουν στο GitHub (`cgkol2005`) τα projects **MyMarket** και **Client–Server Chat με Sockets**, και μετά να μπει στο portfolio το link του καθενός, με κουμπί «GitHub» όπως στο «Προσωπικό Portfolio» (`<a class="project-link" …>`).
-2. **Προτάσεις από τον έλεγχο της σελίδας** (δεν έχουν γίνει):
+1. **Προτάσεις από τον έλεγχο της σελίδας** (δεν έχουν γίνει):
    - Δεν υπάρχει `meta description` και Open Graph, άρα δεν βγαίνει κάρτα προεπισκόπησης όταν στέλνεται το link (LinkedIn, Viber κ.λπ.). Χρειάζεται απόφαση για την εικόνα.
    - Δεν υπάρχει favicon.
    - Το project «Προσωπικό Portfolio» δεν αναφέρει το chat με AI (Claude API, Cloudflare Functions, D1, όριο ερωτήσεων).
    - Κάθε λάθος διεύθυνση δείχνει την αρχική σελίδα με 200, αντί για 404 (λείπει `404.html`).
    - Το `alt` του λογοτύπου ΑΠΘ είναι μόνο στα ελληνικά.
-3. **Το `npx wrangler pages dev .` δεν ξεκινά** μέσα από το Claude Code (`write EOF`, ο `workerd` δεν ξεκινά στο sandbox). Τοπικά τρέχει από το δικό σου τερματικό στο http://localhost:8788.
+2. **Το `npx wrangler pages dev .` δεν ξεκινά** μέσα από το Claude Code (`write EOF`, ο `workerd` δεν ξεκινά στο sandbox). Τοπικά τρέχει από το δικό σου τερματικό στο http://localhost:8788.
